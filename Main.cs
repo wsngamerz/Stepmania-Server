@@ -19,7 +19,7 @@ namespace StepmaniaServer
         static void Main(string[] args)
         {
             SetupLogging();
-            logger.Info("StepmaniaServer v0.0.1 ALPHA [{servername}] Starting", config.Get("/config/server/name", "Unknown Server Name"));
+            logger.Info("StepmaniaServer v0.0.1 ALPHA [{servername}] Starting", config.Get("/config/game-server/name", "Unknown Server Name"));
 
             // start GameServer thread
             gameServerThread = new Thread(GameServer.Start);
@@ -36,28 +36,31 @@ namespace StepmaniaServer
 
         private static void SetupLogging()
         {
+            // setup the configuration for logging
             NLog.Config.LoggingConfiguration config = new NLog.Config.LoggingConfiguration();
 
             // Targets where to log to: File and Console
             string loggingFormat = @"[${date:format=HH\:mm\:ss}] [${callsite}] [${level}] ${message} ${exception}";
 
+            // Logging config for log file
             NLog.Targets.FileTarget logfile = new NLog.Targets.FileTarget("logfile")
             {
-                FileName = "log.txt",
+                FileName = "${basedir}/log.txt",
                 Layout = loggingFormat
             };
 
+            // Logging configuration for logging to console (IN COLOUR!!!)
             NLog.Targets.ColoredConsoleTarget logconsole = new NLog.Targets.ColoredConsoleTarget("logconsole")
             {
                 Layout = loggingFormat
             };
 
+            // Apply the rules!
             config.AddRule(LogLevel.Trace, LogLevel.Fatal, logconsole);
             config.AddRule(LogLevel.Trace, LogLevel.Fatal, logfile);
-
             NLog.LogManager.Configuration = config;
 
-            logger.Debug("Logging setup");
+            logger.Trace("Setting up logging");
         }
     }
 }

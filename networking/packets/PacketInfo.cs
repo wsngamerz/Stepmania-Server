@@ -1,4 +1,5 @@
 namespace StepmaniaServer {
+    // commands for Client -> Server
     public enum SMClientCommand {
         Ping = 0,
         PingR = 1,
@@ -18,6 +19,7 @@ namespace StepmaniaServer {
         XMLPacket = 15
     }
     
+    // Commands for Server -> Client
     public enum SMServerCommand {
         Ping = 128,
         PingR = 129,
@@ -37,6 +39,7 @@ namespace StepmaniaServer {
         XMLPacket = 143
     }
 
+    // SMO Commands for Client -> Server
     public enum SMOClientCommand {
         Login = 0,
         EnterRoom = 1,
@@ -44,10 +47,23 @@ namespace StepmaniaServer {
         RoomInfo = 3
     }
 
+    // SMO Commands for Server -> Client
     public enum SMOServerCommand {
         Login = 0,
         RoomUpdate = 1,
         GeneralInfo = 2,
         RoomInfo = 3
+    }
+
+    // Net Screens used in ScreenChanged Packet
+    public enum SMScreen {
+        ExitedScreenNetSelectMusic = 0,
+        EnteredScreenNetSelectMusic = 1,
+        NotSent = 2,
+        EnteredOptionsScreen = 3,
+        ExitedEvaluationScreen = 4,
+        EnteredEvaluationScreen = 5,
+        ExitedScreenNetRoom = 6,
+        EnteredScreenNetRoom = 7
     }
 }

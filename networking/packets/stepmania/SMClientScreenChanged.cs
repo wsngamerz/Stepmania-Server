@@ -4,12 +4,14 @@ using System.IO;
 
 namespace StepmaniaServer
 {
+    // sent when user enters / exits a network screen
     class SMClientScreenChanged : Packet
     {
         private int _length;
         private int _command;
+        private Dictionary<string, object> _data;
 
-        private int ScreenStatus;
+        private SMScreen ScreenStatus;
 
         public override int Length
         {
@@ -23,10 +25,25 @@ namespace StepmaniaServer
             set { _command = value; }
         }
 
+        public override Dictionary<string, object> Data {
+            get { return _data; }
+            set { _data = value; }
+        }
+
         public override void Read(BinaryReader binaryReader)
         {
-            ScreenStatus = PacketUtils.ReadByte(binaryReader);
-            logger.Trace("Recieved Screen Change - Screen: {screenStatus}", ScreenStatus);
+            // Screen Status:
+            //     0 -> exited ScreenNetSelectMusic
+            //     1 -> entered ScreenNetSelectMusic
+            //     2 -> not sent
+            //     3 -> entered Options
+            //     4 -> exited ScreenNetEvaluation
+            //     5 -> entered ScreenNetEvaluation
+            //     6 -> exited ScreenNetRoom
+            //     7 -> entered ScreenNetRoom
+            ScreenStatus = (SMScreen)PacketUtils.ReadByte(binaryReader);
+
+            logger.Trace("Recieved Screen Change - Status: {screenStatus}", ScreenStatus);
         }
 
         public override void Write(BinaryWriter binaryWriter, Dictionary<string, object> data) { }
