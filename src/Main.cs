@@ -19,7 +19,7 @@ namespace StepmaniaServer
         static void Main(string[] args)
         {
             SetupLogging();
-            logger.Info("StepmaniaServer v0.0.1 ALPHA [{servername}] Starting", config.Get("/config/game-server/name", "Unknown Server Name"));
+            logger.Info("StepmaniaServer ALPHA [{servername}] Starting", config.Get("/config/game-server/name", "Unknown Server Name"));
 
             // start GameServer thread
             gameServerThread = new Thread(GameServer.Start);
