@@ -28,9 +28,12 @@ namespace StepmaniaServer
             gameServerThread = new Thread(GameServer.Start);
             gameServerThread.Start();
 
-            // start WebServer thread
-            webServerThread = new Thread(WebsiteServer.Start);
-            webServerThread.Start();
+            // start WebServer thread if enabled
+            if (config.Get("/config/web-server/enabled", "true") == "true")
+            {
+                webServerThread = new Thread(WebsiteServer.Start);
+                webServerThread.Start();
+            }
 
             while (isRunning)
             {
