@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -44,7 +45,7 @@ namespace StepmaniaServer
 
                 // get some basic info about the client
                 string clientInformation = newTcpClient.Client.RemoteEndPoint.ToString();
-                logger.Debug("New client connected {information}", clientInformation);
+                logger.Debug("Client {information} connected", clientInformation);
 
                 // TODO: Implement ban checking etc.
 
@@ -56,13 +57,38 @@ namespace StepmaniaServer
 
         private static void GameClientThread()
         {
+            int fullTicks = 0;
             // game client thread loop
             while (true)
             {
                 // loop through all clients and update them periodically
-                foreach (GameClient gameClient in gameClients)
+                foreach (GameClient gameClient in gameClients.ToList())
                 {
-                    gameClient.Update();
+                    if (gameClient.updates >= 100)
+                    {
+                        gameClient.SendPing();
+                    }
+                    
+                    // only update if the client is still connected
+                    if (gameClient.tcpClient.Connected)
+                    {
+                        gameClient.Update();
+                    }
+                    // if the client is no longer connected, remove it from the list and stop updating it
+                    else
+                    {
+                        logger.Trace("Client is no longer connected, removing from update list");
+                        gameClients.Remove(gameClient);
+                        logger.Debug("Client {information} disconnected", gameClient.clientInformation);
+                    }
+                }
+
+                // send message every 30 seconds (20 * 30 ticks)
+                fullTicks++;
+                if (fullTicks >= (20 * 30))
+                {
+                    logger.Info("There are currently {num} Client(s) connected", gameClients.Count);
+                    fullTicks = 0;
                 }
 
                 // NOTE: should probably calculate the time taken for the update and

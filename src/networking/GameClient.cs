@@ -16,14 +16,20 @@ namespace StepmaniaServer
 
         private static Config config = new Config();
 
-        private static TcpClient tcpClient;
-        private static BinaryReader tcpReader;
-        private static BinaryWriter tcpWriter;
-        private static NetworkStream tcpStream;
+        public TcpClient tcpClient;
+        public string clientInformation;
+        public int updates;
+
+        private BinaryReader tcpReader;
+        private BinaryWriter tcpWriter;
+        private NetworkStream tcpStream;
 
         public GameClient(TcpClient client)
         {
             tcpClient = client;
+            clientInformation = tcpClient.Client.RemoteEndPoint.ToString();
+            updates = 0;
+
             tcpStream = tcpClient.GetStream();
             tcpStream.ReadTimeout = Convert.ToInt32(config.Get("/config/game-server/timeout", "1000"));
             tcpReader = new BinaryReader(tcpStream);
@@ -32,6 +38,9 @@ namespace StepmaniaServer
 
         public void Update()
         {
+            // increment the number of updates
+            updates++;
+
             // if client has sent data that has been recieved by the server
             if (tcpClient.Available > 0)
             {
@@ -259,6 +268,18 @@ namespace StepmaniaServer
 
             // send packet to client
             smoUpdateRoomListPacket.Write(tcpWriter, smoUpdateRoomList);
+            tcpWriter.Flush();
+        }
+
+        // used to check whether the client is still connected
+        public void SendPing()
+        {
+            // reset update counter
+            updates = 0;
+
+            logger.Trace("Sending Ping");
+            Packet smoPingPacket = new SMServerPing();
+            smoPingPacket.Write(tcpWriter, new Dictionary<string, object>());
             tcpWriter.Flush();
         }
     }
