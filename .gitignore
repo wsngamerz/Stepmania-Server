@@ -2,3 +2,4 @@ obj/
 bin/
 
 config.xml
+database.db

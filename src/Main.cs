@@ -14,12 +14,15 @@ namespace StepmaniaServer
         private static Thread gameServerThread;
         private static Thread webServerThread;
 
+        public static StepmaniaContext dbContext;
         public static bool isRunning = true;
 
         static void Main(string[] args)
         {
             SetupLogging();
             logger.Info("StepmaniaServer ALPHA [{servername}] Starting", config.Get("/config/game-server/name", "Unknown Server Name"));
+
+            SetupDatabases();
 
             // start GameServer thread
             gameServerThread = new Thread(GameServer.Start);
@@ -61,6 +64,17 @@ namespace StepmaniaServer
             NLog.LogManager.Configuration = config;
 
             logger.Trace("Setting up logging");
+        }
+
+        private static void SetupDatabases()
+        {
+            logger.Trace("Setting up databases");
+            dbContext = new StepmaniaContext();
+            // Create database if not exists
+            dbContext.Database.EnsureCreated();
+
+            // Save Changes
+            dbContext.SaveChanges();
         }
     }
 }

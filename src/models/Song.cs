@@ -7,15 +7,16 @@ namespace StepmaniaServer
 {
     public class Song
     {
-        public static string Id { get; set; }
-        public static string Title { get; set; }
-        public static string Subtitle { get; set; }
-        public static string Artist { get; set; }
+        public string Id { get; set; }
+        public string Title { get; set; }
+        public string Subtitle { get; set; }
+        public string Artist { get; set; }
 
         public virtual ICollection<Game> Games { get; set; }
+        public virtual ICollection<Room> ActiveRooms { get; set; }
         public virtual ICollection<SongStatistic> SongStatistics { get; set; }
         
-        public static DateTime CreatedAt { get; set; }
-        public static DateTime UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

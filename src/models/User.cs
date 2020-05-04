@@ -20,6 +20,7 @@ namespace StepmaniaServer
         public string Name { get; set; }
         public string Userame { get; set; }
         public string Password { get; set; }
+        public string SMPassword { get; set; }
         public string Email { get; set; }
         public int Rank { get; set; }
         public int Xp { get; set; }

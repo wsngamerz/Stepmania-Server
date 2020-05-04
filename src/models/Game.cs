@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 
 
@@ -6,14 +7,15 @@ namespace StepmaniaServer
 {
     public class Game
     {
-        public static string Id { get; set; }
-        public static bool Active { get; set; }
+        public string Id { get; set; }
+        public bool Active { get; set; }
 
-        public virtual Song Song { get; set; }
         public virtual Room Room { get; set; }
+        public virtual Song Song { get; set; }
+        public virtual ICollection<SongStatistic> SongStatistics { get; set; }
 
-        public static DateTime EndAt { get; set; }
-        public static DateTime CreatedAt { get; set; }
-        public static DateTime UpdatedAt { get; set; }
+        public DateTime EndAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

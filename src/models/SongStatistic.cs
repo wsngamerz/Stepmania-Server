@@ -27,32 +27,32 @@ namespace StepmaniaServer
     
     public class SongStatistic
     {
-        public static string Id { get; set; }
+        public string Id { get; set; }
         
+        public virtual Game Game { get; set; }
         public virtual Song Song { get; set; }
         public virtual User User { get; set; }
-        public virtual Game Game { get; set; }
 
-        public static int HitMine { get; set; }
-        public static int AvoidMine { get; set; }
-        public static int Miss { get; set; }
-        public static int Bad { get; set; }
-        public static int Good { get; set; }
-        public static int Great { get; set; }
-        public static int Perfect { get; set; }
-        public static int Flawless { get; set; }
-        public static int NotHeld { get; set; }
-        public static int Held { get; set; }
+        public int HitMine { get; set; }
+        public int AvoidMine { get; set; }
+        public int Miss { get; set; }
+        public int Bad { get; set; }
+        public int Good { get; set; }
+        public int Great { get; set; }
+        public int Perfect { get; set; }
+        public int Flawless { get; set; }
+        public int NotHeld { get; set; }
+        public int Held { get; set; }
 
-        public static int MaxCombo { get; set; }
-        public static string Options { get; set; }
-        public static int Score { get; set; }
-        public static SongStatisticGrade Grade { get; set; }
-        public static SongStatisticDifficulty Difficulty { get; set; }
-        public static int Percentage { get; set; }
-        public static int Duration { get; set; }
+        public int MaxCombo { get; set; }
+        public string Options { get; set; }
+        public int Score { get; set; }
+        public SongStatisticGrade Grade { get; set; }
+        public SongStatisticDifficulty Difficulty { get; set; }
+        public int Percentage { get; set; }
+        public int Duration { get; set; }
 
-        public static DateTime CreatedAt { get; set; }
-        public static DateTime UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }
