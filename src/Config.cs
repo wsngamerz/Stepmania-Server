@@ -30,33 +30,81 @@ namespace StepmaniaServer
 
                 using (XmlWriter writer = XmlWriter.Create("config.xml", settings))
                 {
+                    // start config options
+                    writer.WriteComment("Stepmainia Server aspires to be extremly configurable so here you go");
                     writer.WriteStartElement("config");
 
+                    // start game-server config options
+                    writer.WriteComment("Config options relating to the game server");
                     writer.WriteStartElement("game-server");
-                    writer.WriteElementString("ip", "0.0.0.0");
-                    writer.WriteElementString("port", "8765");
-                    writer.WriteElementString("name", "WSNStepzz");
-                    writer.WriteElementString("timeout", "1000");
-                    writer.WriteElementString("protocol", "128");
-                    writer.WriteEndElement();
-                    
-                    writer.WriteStartElement("web-server");
-                    writer.WriteElementString("enabled", "true");
-                    writer.WriteElementString("ip", "localhost");
-                    writer.WriteElementString("port", "8080");
-                    writer.WriteEndElement();
 
-                    writer.WriteStartElement("database");
-                    writer.WriteElementString("type", "sqlite");
-                    writer.WriteElementString("file", "database.db");
-                    writer.WriteElementString("username", "user");
-                    writer.WriteElementString("password", "pass");
-                    writer.WriteElementString("database", "stepmaniaserver");
-                    writer.WriteElementString("host", "localhost");
-                    writer.WriteElementString("port", "3306");
-                    writer.WriteEndElement();
+                    writer.WriteComment("ip: the ip to host the game server on");
+                    writer.WriteElementString("ip", "0.0.0.0");
+                    
+                    writer.WriteComment("port: the port to host the game server on (not recommended to change)");
+                    writer.WriteElementString("port", "8765");
+                    
+                    writer.WriteComment("name: The server name");
+                    writer.WriteElementString("name", "WSNStepzz");
+                    
+                    writer.WriteComment("timeout: The server timeout in ms");
+                    writer.WriteElementString("timeout", "1000");
+                    
+                    writer.WriteComment("protocol: The server protocol version (not recommended to change)");
+                    writer.WriteElementString("protocol", "128");
                     
                     writer.WriteEndElement();
+                    // end game-server config options
+                    
+                    // start web-server config options
+                    writer.WriteComment("Config options relating to the web server");
+                    writer.WriteStartElement("web-server");
+                    
+                    writer.WriteComment("enabled: [true/false] - whether to enable the embedded web server or not");
+                    writer.WriteElementString("enabled", "true");
+                    
+                    writer.WriteComment("ip: the ip to host the web server on");
+                    writer.WriteElementString("ip", "localhost");
+                    
+                    writer.WriteComment("port: the port to host the web server on");
+                    writer.WriteElementString("port", "8080");
+                    
+                    writer.WriteEndElement();
+                    // end web-server config options
+
+                    // start database config options
+                    writer.WriteComment("Config options relating to the database");
+                    writer.WriteStartElement("database");
+                    
+                    writer.WriteComment("type: Can currently be one of [sqlite, mysql]");
+                    writer.WriteElementString("type", "sqlite");
+                    
+                    writer.WriteComment("file: a file path used to store the sqlite database (SQLite Only)");
+                    writer.WriteElementString("file", "database.db");
+                    
+                    writer.WriteComment("The following options are only used in database servers such as MySQL (Not SQLite)");
+                    writer.WriteComment("username: Username to the database server");
+                    writer.WriteElementString("username", "user");
+                    
+                    writer.WriteComment("password: Password to the database server");
+                    writer.WriteElementString("password", "pass");
+                    
+                    writer.WriteComment("database: The name of the database to use/create");
+                    writer.WriteElementString("database", "stepmaniaserver");
+                    
+                    writer.WriteComment("host: The host of the database server");
+                    writer.WriteElementString("host", "localhost");
+                    
+                    writer.WriteComment("port: The port of the database server");
+                    writer.WriteElementString("port", "3306");
+                    
+                    writer.WriteEndElement();
+                    // end database config options
+                    
+                    writer.WriteEndElement();
+                    // end config options
+
+                    // write to file
                     writer.Flush();
                 }
             }
