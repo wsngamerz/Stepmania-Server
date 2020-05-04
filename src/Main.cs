@@ -48,8 +48,10 @@ namespace StepmaniaServer
             // Logging config for log file
             NLog.Targets.FileTarget logfile = new NLog.Targets.FileTarget("logfile")
             {
-                FileName = "${basedir}/log.txt",
-                Layout = loggingFormat
+                FileName = "${currentdir}/logs/stepmaniaserver.log",
+                Layout = loggingFormat,
+                ArchiveNumbering = NLog.Targets.ArchiveNumberingMode.Rolling,
+                ArchiveEvery = NLog.Targets.FileArchivePeriod.Day
             };
 
             // Logging configuration for logging to console (IN COLOUR!!!)
