@@ -180,6 +180,47 @@ namespace StepmaniaServer
                                 break;
                             
                             case (int)SMOClientCommand.RoomInfo:
+                                string roomName = (string)smoPacket.Data["roomName"];
+
+                                Room room = StepmaniaServer.dbContext.Rooms.Where(s => s.Name == roomName).SingleOrDefault();
+
+                                if (room != null)
+                                {
+                                    // create a response packet
+                                    Dictionary<string, object> smoRoomInfo = new Dictionary<string, object>();
+                                    Packet smoRoomInfoPacket = new SMOServerRoomInfo();
+
+                                    List<string> playerNames = new List<string>();
+                                    int numberPlayers = 0;
+                                    if (room.Users != null)
+                                    {
+                                        numberPlayers = room.Users.Count;
+                                        foreach (User user in room.Users)
+                                        {
+                                            playerNames.Add(user.Username);
+                                        }
+                                    }
+
+                                    if (room.ActiveSong != null)
+                                    {
+                                        smoRoomInfo.Add("lastSongTitle", room.ActiveSong.Title);
+                                        smoRoomInfo.Add("lastSongSubtitle", room.ActiveSong.Subtitle);
+                                        smoRoomInfo.Add("lastSongArtist", room.ActiveSong.Artist);
+                                    }
+                                    else
+                                    {
+                                        smoRoomInfo.Add("lastSongTitle", "No Song Played");
+                                        smoRoomInfo.Add("lastSongSubtitle", "N/A");
+                                        smoRoomInfo.Add("lastSongArtist", "N/A");
+                                    }
+
+                                    smoRoomInfo.Add("numberPlayers", numberPlayers);
+                                    smoRoomInfo.Add("maxPlayers", room.MaxUsers);
+                                    smoRoomInfo.Add("playerNames", playerNames);
+
+                                    smoRoomInfoPacket.Write(tcpWriter, smoRoomInfo);
+                                    tcpWriter.Flush();
+                                }
                                 break;
                         }
                         break;

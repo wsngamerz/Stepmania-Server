@@ -131,6 +131,10 @@ namespace StepmaniaServer
                     // room name
                     string roomName = PacketUtils.ReadNTString(binaryReader);
 
+                    Dictionary<string, object> roomInfoData = new Dictionary<string, object>();
+                    roomInfoData.Add("roomName", roomName);
+                    Data = roomInfoData;
+
                     logger.Trace("[SMO] Room Info - Name: {roomName}", roomName);
                     break;
             }
