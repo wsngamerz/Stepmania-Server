@@ -80,6 +80,9 @@ namespace StepmaniaServer
         {
             switch (command)
             {
+                case (int)SMClientCommand.PingR:
+                    return new SMClientPingR();
+
                 case (int)SMClientCommand.Hello:
                     return new SMClientHello();
 
