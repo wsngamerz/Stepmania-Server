@@ -1,6 +1,7 @@
 obj/
 bin/
 
-logs/
+Data/
+Logs/
 config.xml
 database.db

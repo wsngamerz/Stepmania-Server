@@ -18,8 +18,11 @@ namespace StepmaniaServer
 
         public Config()
         {
-            if(!File.Exists("config.xml"))
+            if(!File.Exists("Data/config.xml"))
             {
+                // create the folder if it doesnt exist
+                Directory.CreateDirectory("Data/");
+
                 // if the file doesn't already exist, create it and populate it with some
                 // default values
                 Console.WriteLine("Unable to find Config File, creating new file");
@@ -28,7 +31,7 @@ namespace StepmaniaServer
                 settings.Indent = true;
                 settings.IndentChars = "    ";
 
-                using (XmlWriter writer = XmlWriter.Create("config.xml", settings))
+                using (XmlWriter writer = XmlWriter.Create("Data/config.xml", settings))
                 {
                     // start config options
                     writer.WriteComment("Stepmainia Server aspires to be extremly configurable so here you go");
@@ -80,7 +83,7 @@ namespace StepmaniaServer
                     writer.WriteElementString("type", "sqlite");
                     
                     writer.WriteComment("file: a file path used to store the sqlite database (SQLite Only)");
-                    writer.WriteElementString("file", "database.db");
+                    writer.WriteElementString("file", "Data/database.db");
                     
                     writer.WriteComment("The following options are only used in database servers such as MySQL (Not SQLite)");
                     writer.WriteComment("username: Username to the database server");
@@ -111,7 +114,7 @@ namespace StepmaniaServer
 
             // load the xml file contents into the class
             document = new XmlDocument();
-            document.Load("config.xml");
+            document.Load("Data/config.xml");
         }
 
         // ensure only 1 config class is ever created accross threads
