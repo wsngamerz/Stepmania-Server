@@ -65,12 +65,12 @@ namespace StepmaniaServer
                     string password = PacketUtils.ReadNTString(binaryReader);
 
                     // store all of the parsed data in the Data dictionary
-                    Dictionary<string, object> data = new Dictionary<string, object>();
-                    data.Add("playerNumber", playerNumber);
-                    data.Add("isEncrypted", isEncrypted);
-                    data.Add("username", username);
-                    data.Add("password", password);
-                    Data = data;
+                    Dictionary<string, object> loginData = new Dictionary<string, object>();
+                    loginData.Add("playerNumber", playerNumber);
+                    loginData.Add("isEncrypted", isEncrypted);
+                    loginData.Add("username", username);
+                    loginData.Add("password", password);
+                    Data = loginData;
 
                     logger.Trace("[SMO] Login - Player Number: {playerNum} - Encrypted: {encrypted} - Username: {username} - Password: {password}", playerNumber, isEncrypted, username, password);
                     break;
@@ -85,6 +85,13 @@ namespace StepmaniaServer
 
                     // room password (empty if unused)
                     string enterRoomPassword = PacketUtils.ReadNTString(binaryReader);
+
+                    // store all of the parsed data in the Data dictionary
+                    Dictionary<string, object> enterRoomData = new Dictionary<string, object>();
+                    enterRoomData.Add("isEnter", isEnter);
+                    enterRoomData.Add("enterRoomName", enterRoomName);
+                    enterRoomData.Add("enterRoomPassword", enterRoomPassword);
+                    Data = enterRoomData;
 
                     logger.Trace("[SMO] {enterExit} Room - Name: {roomName} - Password: {roomPassword}", isEnter ? "Entering" : "Leaving", enterRoomName, enterRoomPassword);
                     break;
@@ -103,7 +110,18 @@ namespace StepmaniaServer
                     // TODO: Handle an empty password as it crashes if the password is empty
                     
                     // room password (blank if no password)
-                    string newRoomPassword = PacketUtils.ReadNTString(binaryReader);
+                    string newRoomPassword = null;
+                    if (Length > (5 + newRoomName.Length + newRoomDescription.Length)) {
+                        newRoomPassword = PacketUtils.ReadNTString(binaryReader);
+                    }
+
+                    // store all of the parsed data in the Data dictionary
+                    Dictionary<string, object> createRoomData = new Dictionary<string, object>();
+                    createRoomData.Add("isGame", isGame);
+                    createRoomData.Add("newRoomName", newRoomName);
+                    createRoomData.Add("newRoomDescription", newRoomDescription);
+                    createRoomData.Add("newRoomPassword", newRoomPassword);
+                    Data = createRoomData;
 
                     logger.Trace("[SMO] Create Room - Name: {roomName} - Description: {roomDescription} - Password: {roomPassword}", newRoomName, newRoomDescription, newRoomPassword);
                     break;

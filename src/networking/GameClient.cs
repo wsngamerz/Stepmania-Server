@@ -69,6 +69,15 @@ namespace StepmaniaServer
 
                         break;
                     
+                    case (int)SMClientCommand.ScreenChanged:
+                        switch((SMScreen)packet.Data["screenStatus"])
+                        {
+                            case SMScreen.EnteredScreenNetRoom:
+                                UpdateRoomList();
+                                break;
+                        }
+                        break;
+                    
                     case (int)SMClientCommand.SMOnlinePacket:
                         // if the packet is a StepMania Online packet, do a bit more work as it
                         // is basically an encapsulated packet
@@ -155,6 +164,19 @@ namespace StepmaniaServer
                                 break;
                             
                             case (int)SMOClientCommand.CreateRoom:
+                                Room newRoom = new Room()
+                                {
+                                    Id = Guid.NewGuid().ToString(),
+                                    Name = (string)smoPacket.Data["newRoomName"],
+                                    Description = (string)smoPacket.Data["newRoomDescription"],
+                                    Password = (string)smoPacket.Data["newRoomPassword"],
+                                    Status = RoomStatus.NORMAL
+                                };
+
+                                StepmaniaServer.dbContext.Add<Room>(newRoom);
+                                StepmaniaServer.dbContext.SaveChanges();
+
+                                UpdateRoomList();
                                 break;
                             
                             case (int)SMOClientCommand.RoomInfo:
@@ -163,6 +185,40 @@ namespace StepmaniaServer
                         break;
                 }
             }
+        }
+
+        // used to send the client an updated list of available rooms
+        private void UpdateRoomList()
+        {
+            logger.Trace("Sending list of rooms");
+
+            // get all the rooms fom from the db in a list
+            List<Room> rooms = StepmaniaServer.dbContext.Rooms.ToList();
+            List<Tuple<string, string, byte, byte>> formattedRooms = new List<Tuple<string, string, byte, byte>>();
+
+            // pull all required data and place in a List of Tuples
+            foreach (Room room in rooms)
+            {
+                string roomName = room.Name;
+                string roomDescription = room.Description;
+                byte roomStatus = (byte)room.Status;
+                byte roomPasswordless = (room.Password == null) ? (byte)0x01 : (byte)0x00;
+
+                formattedRooms.Add(new Tuple<string, string, byte, byte>(roomName, roomDescription, roomStatus, roomPasswordless));
+            }
+
+            // create a response packet
+            Dictionary<string, object> smoUpdateRoomList = new Dictionary<string, object>();
+            Packet smoUpdateRoomListPacket = new SMOServerRoomUpdate();
+
+            // add required info
+            smoUpdateRoomList.Add("update", "rooms");
+            smoUpdateRoomList.Add("numberRooms", formattedRooms.Count);
+            smoUpdateRoomList.Add("rooms", formattedRooms);
+
+            // send packet to client
+            smoUpdateRoomListPacket.Write(tcpWriter, smoUpdateRoomList);
+            tcpWriter.Flush();
         }
     }
 }

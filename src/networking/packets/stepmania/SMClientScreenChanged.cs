@@ -43,6 +43,10 @@ namespace StepmaniaServer
             //     7 -> entered ScreenNetRoom
             ScreenStatus = (SMScreen)PacketUtils.ReadByte(binaryReader);
 
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data.Add("screenStatus", ScreenStatus);
+            Data = data;
+
             logger.Trace("Recieved Screen Change - Status: {screenStatus}", ScreenStatus);
         }
 
