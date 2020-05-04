@@ -21,7 +21,7 @@ namespace StepmaniaServer
 
         public override int Command
         {
-            get { return (int)SMServerCommand.Hello; }
+            get { return (int)SMServerCommand.Ping; }
             set { _command = value; }
         }
 
