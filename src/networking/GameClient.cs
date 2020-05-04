@@ -170,6 +170,42 @@ namespace StepmaniaServer
                                 break;
                             
                             case (int)SMOClientCommand.EnterRoom:
+                                if ((bool)smoPacket.Data["isEnter"])
+                                {
+                                    Room roomToEnter = StepmaniaServer.dbContext.Rooms.Where(s => s.Name == (string)smoPacket.Data["enterRoomName"]).SingleOrDefault();
+                                    
+                                    // catch blank password
+                                    string roomToEnterPassword = roomToEnter.Password;
+                                    if (roomToEnterPassword == null)
+                                    {
+                                        roomToEnterPassword = "";
+                                    }
+
+                                    // attemp authentication for room
+                                    if (roomToEnterPassword == (string)smoPacket.Data["enterRoomPassword"])
+                                    {
+                                        logger.Trace("Correct password for room entered, allow room entry");
+
+                                        // create a response packet
+                                        Dictionary<string, object> smoEnterRoom = new Dictionary<string, object>();
+                                        Packet smoEnterRoomPacket = new SMOServerRoomUpdate();
+
+                                        // add the data
+                                        smoEnterRoom.Add("update", "title");
+                                        smoEnterRoom.Add("roomTitle", roomToEnter.Name);
+                                        smoEnterRoom.Add("roomDescription", roomToEnter.Description);
+                                        smoEnterRoom.Add("isGame", true); // TODO: Support 'chat' rooms
+                                        smoEnterRoom.Add("allowSubroom", false);
+
+                                        // write the packet
+                                        smoEnterRoomPacket.Write(tcpWriter, smoEnterRoom);
+                                        tcpWriter.Flush();
+                                    }
+                                    else
+                                    {
+                                        logger.Trace("Incorrect room password. Correct {correctPassword}, Entered: {enteredPassword}", roomToEnterPassword, smoPacket.Data["enterRoomPassword"]);
+                                    }
+                                }
                                 break;
                             
                             case (int)SMOClientCommand.CreateRoom:
