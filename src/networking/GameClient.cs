@@ -7,6 +7,7 @@ using System.Linq;
 using NLog;
 
 
+
 namespace StepmaniaServer
 {
     // represents a connected client
@@ -26,11 +27,13 @@ namespace StepmaniaServer
 
         public GameClient(TcpClient client)
         {
+            // store client information and TCP class
             tcpClient = client;
             clientInformation = tcpClient.Client.RemoteEndPoint.ToString();
             updates = 0;
-
             tcpStream = tcpClient.GetStream();
+
+            // set config options
             tcpStream.ReadTimeout = Convert.ToInt32(config.Get("/config/game-server/timeout", "1000"));
             tcpReader = new BinaryReader(tcpStream);
             tcpWriter = new BinaryWriter(tcpStream);
@@ -75,7 +78,6 @@ namespace StepmaniaServer
                         // send the packet
                         smHelloPacket.Write(tcpWriter, smHelloData);
                         tcpWriter.Flush();
-
                         break;
                     
                     case (int)SMClientCommand.ScreenChanged:
@@ -172,6 +174,7 @@ namespace StepmaniaServer
                             case (int)SMOClientCommand.EnterRoom:
                                 if ((bool)smoPacket.Data["isEnter"])
                                 {
+                                    // get the room the client wants to enter from database
                                     Room roomToEnter = StepmaniaServer.dbContext.Rooms.Where(s => s.Name == (string)smoPacket.Data["enterRoomName"]).SingleOrDefault();
                                     
                                     // catch blank password
@@ -209,6 +212,7 @@ namespace StepmaniaServer
                                 break;
                             
                             case (int)SMOClientCommand.CreateRoom:
+                                // create a room entity holding the information
                                 Room newRoom = new Room()
                                 {
                                     Id = Guid.NewGuid().ToString(),
@@ -218,27 +222,32 @@ namespace StepmaniaServer
                                     Status = RoomStatus.NORMAL
                                 };
 
+                                // add to database and apply changes
                                 StepmaniaServer.dbContext.Add<Room>(newRoom);
                                 StepmaniaServer.dbContext.SaveChanges();
 
+                                // trigger an update for the client
                                 UpdateRoomList();
                                 break;
                             
                             case (int)SMOClientCommand.RoomInfo:
+                                // get the room that the information is requested about
                                 string roomName = (string)smoPacket.Data["roomName"];
-
                                 Room room = StepmaniaServer.dbContext.Rooms.Where(s => s.Name == roomName).SingleOrDefault();
 
+                                // if the room exists
                                 if (room != null)
                                 {
                                     // create a response packet
                                     Dictionary<string, object> smoRoomInfo = new Dictionary<string, object>();
                                     Packet smoRoomInfoPacket = new SMOServerRoomInfo();
 
+                                    // get the players currently online
                                     List<string> playerNames = new List<string>();
                                     int numberPlayers = 0;
                                     if (room.Users != null)
                                     {
+                                        // if there are players online
                                         numberPlayers = room.Users.Count;
                                         foreach (User user in room.Users)
                                         {
@@ -246,6 +255,7 @@ namespace StepmaniaServer
                                         }
                                     }
 
+                                    // if there is an active song/recent song
                                     if (room.ActiveSong != null)
                                     {
                                         smoRoomInfo.Add("lastSongTitle", room.ActiveSong.Title);
@@ -254,6 +264,7 @@ namespace StepmaniaServer
                                     }
                                     else
                                     {
+                                        // otherwise send back 'blank' data
                                         smoRoomInfo.Add("lastSongTitle", "No Song Played");
                                         smoRoomInfo.Add("lastSongSubtitle", "N/A");
                                         smoRoomInfo.Add("lastSongArtist", "N/A");
@@ -263,6 +274,7 @@ namespace StepmaniaServer
                                     smoRoomInfo.Add("maxPlayers", room.MaxUsers);
                                     smoRoomInfo.Add("playerNames", playerNames);
 
+                                    // write packet to client
                                     smoRoomInfoPacket.Write(tcpWriter, smoRoomInfo);
                                     tcpWriter.Flush();
                                 }
@@ -313,7 +325,7 @@ namespace StepmaniaServer
             // reset update counter
             updates = 0;
 
-            logger.Trace("Sending Ping");
+            // create a ping packet and send it
             Packet smoPingPacket = new SMServerPing();
             smoPingPacket.Write(tcpWriter, new Dictionary<string, object>());
             tcpWriter.Flush();

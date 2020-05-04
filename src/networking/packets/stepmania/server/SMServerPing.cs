@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 
 
+
 namespace StepmaniaServer
 {
-    // packet sent to the client by the server in response to the client's
-    // hello packet to introduce the server to the client.
+    // packet sent to the client by the server to check whether
+    // the client is still connected properly
     class SMServerPing : Packet
     {
         private int _length;
@@ -37,6 +38,9 @@ namespace StepmaniaServer
             // calculate the length of the packet
             Length = 1;
 
+            // NOTE: A ping packet has no payload so only the length of the
+            //       packet and the packet command are sent (5 bytes total)
+
             // create a memorystream to hold the packet to send
             MemoryStream packetStream = new MemoryStream(Length + 4);
             PacketUtils.WriteLength(packetStream, Length);
@@ -53,7 +57,9 @@ namespace StepmaniaServer
             }
             catch (Exception e)
             {
-                logger.Error(e, "Error sending ping, client disconnected?");
+                // if there is an error, it probably means that the client has disconnected but
+                // log it as a warning anyways just in case an error that was not expected occurs
+                logger.Warn(e, "Error sending ping, client disconnected?");
             }
         }
     }

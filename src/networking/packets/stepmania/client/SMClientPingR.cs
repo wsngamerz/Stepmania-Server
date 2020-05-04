@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using System.IO;
 
 
+
 namespace StepmaniaServer
 {
-    // sent when user enters / exits a network screen
+    // Sent in response to the server sending a ping to the client
     class SMClientPingR : Packet
     {
         private int _length;
@@ -28,6 +29,7 @@ namespace StepmaniaServer
             set { _data = value; }
         }
 
+        // The ping response packet has no payload so no parsing takes place
         public override void Read(BinaryReader binaryReader)
         {
             logger.Trace("Recieved Ping Response");

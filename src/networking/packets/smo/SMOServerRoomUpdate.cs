@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 
 
+
 namespace StepmaniaServer
 {
     // packet for the servers login response
@@ -44,17 +45,21 @@ namespace StepmaniaServer
             byte updateType;
 
             // update the 'title' of a room
+            // this is also known as entering a room
             if((string)data["update"] == "title")
             {
+                // load room information
                 updateType = 0x00;
                 string roomTitle = (string)data["roomTitle"];
                 string roomDescription = (string)data["roomDescription"];
                 byte roomType = ((bool)data["isGame"]) ? (byte)0x01 : (byte)0x00;
                 byte allowSubroom = ((bool)data["allowSubroom"]) ? (byte)0x01 : (byte)0x00;
 
+                // calculate length of packet
                 Length = 7 + roomTitle.Length + roomDescription.Length;
                 packetStream = new MemoryStream(Length + 4);
 
+                // write data to memory stream
                 PacketUtils.WriteLength(packetStream, Length);
                 PacketUtils.WriteByte(packetStream, (byte)SMServerCommand.SMOnlinePacket);
                 PacketUtils.WriteByte(packetStream, (byte)SMOServerCommand.RoomUpdate);
@@ -67,10 +72,12 @@ namespace StepmaniaServer
             // update the list of rooms
             else if ((string)data["update"] == "rooms")
             {
+                // load information of all the rooms
                 updateType = 0x01;
                 int numberRooms = (int)data["numberRooms"];
                 List<Tuple<string, string, byte, byte>> rooms = (List<Tuple<string, string, byte, byte>>)data["rooms"];
 
+                // calculate packet length
                 int totalPacketLength = 4;
                 foreach (Tuple<string, string, byte, byte> room in rooms)
                 {
@@ -82,12 +89,14 @@ namespace StepmaniaServer
                 Length = totalPacketLength;
                 packetStream = new MemoryStream(Length + 4);
 
+                // write to memory stream
                 PacketUtils.WriteLength(packetStream, Length);
                 PacketUtils.WriteByte(packetStream, (byte)SMServerCommand.SMOnlinePacket);
                 PacketUtils.WriteByte(packetStream, (byte)SMOServerCommand.RoomUpdate);
                 PacketUtils.WriteByte(packetStream, updateType);
                 PacketUtils.WriteByte(packetStream, (byte)numberRooms);
 
+                // write info for each room
                 foreach (Tuple<string, string, byte, byte> room in rooms)
                 {
                     PacketUtils.WriteNTString(packetStream, room.Item1);

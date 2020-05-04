@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 
 
+
 namespace StepmaniaServer
 {
     // The SMOnline Packet is a wrapper of sorts for the SMOnline protocol
@@ -12,6 +13,7 @@ namespace StepmaniaServer
         private int _smocommand;
         private Dictionary<string, object> _data;
 
+        // the sub-protocol command ID
         public int SMOnlineCommand;
 
         public override int Length

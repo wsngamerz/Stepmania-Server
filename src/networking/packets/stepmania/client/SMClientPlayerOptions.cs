@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using System.IO;
 
 
+
 namespace StepmaniaServer
 {
-    // The first packet sent to the server by the client
+    // sent when the user joins a room or the user changes their options
     class SMClientPlayerOptions : Packet
     {
         private int _length;
@@ -33,10 +34,11 @@ namespace StepmaniaServer
 
         public override void Read(BinaryReader binaryReader)
         {
-
+            // read in the player options
             Player1Options = PacketUtils.ReadNTString(binaryReader);
             Player2Options = PacketUtils.ReadNTString(binaryReader);
 
+            // save them in a dictionary
             Dictionary<string, object> data = new Dictionary<string, object>();
             data.Add("player1Options", Player1Options);
             data.Add("player2Options", Player2Options);

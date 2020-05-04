@@ -5,11 +5,13 @@ using System.Xml;
 using NLog;
 
 
+
 namespace StepmaniaServer
 {
     public class Config
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        
         static Config instance = null;
         static readonly object padlock = new object();
 

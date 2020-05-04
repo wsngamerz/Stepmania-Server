@@ -13,6 +13,7 @@ namespace StepmaniaServer
     class WebsiteServer
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        
         private static Config config = new Config();
 
         // start the web server

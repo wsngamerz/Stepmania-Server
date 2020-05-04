@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 
 
+
 namespace StepmaniaServer
 {
     //!IMPORTANT! This command is unrelated to Server Command 0x06 (006). !IMPORTANT!

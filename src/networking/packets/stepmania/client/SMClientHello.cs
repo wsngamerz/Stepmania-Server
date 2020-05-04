@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 
 
+
 namespace StepmaniaServer
 {
     // The first packet sent to the server by the client
@@ -42,7 +43,13 @@ namespace StepmaniaServer
 
             // stepmania build name
             ClientBuild = PacketUtils.ReadNTString(binaryReader);
-            
+
+            // save information
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data.Add("clientProtocolVersion", ClientProtocolVersion);
+            data.Add("clientBuild", ClientBuild);
+            Data = data;
+
             logger.Trace("Recieved Hello from client {build} protocol {protocol}", ClientBuild, ClientProtocolVersion);
         }
 

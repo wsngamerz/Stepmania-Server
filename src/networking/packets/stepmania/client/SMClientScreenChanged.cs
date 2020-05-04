@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 
 
+
 namespace StepmaniaServer
 {
     // sent when user enters / exits a network screen
@@ -43,6 +44,7 @@ namespace StepmaniaServer
             //     7 -> entered ScreenNetRoom
             ScreenStatus = (SMScreen)PacketUtils.ReadByte(binaryReader);
 
+            // save the current position of the client in a dictionary
             Dictionary<string, object> data = new Dictionary<string, object>();
             data.Add("screenStatus", ScreenStatus);
             Data = data;

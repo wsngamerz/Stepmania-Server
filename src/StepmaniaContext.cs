@@ -11,6 +11,7 @@ namespace StepmaniaServer
     public class StepmaniaContext : DbContext
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        
         private static Config config = new Config();
 
         // Load all of the models

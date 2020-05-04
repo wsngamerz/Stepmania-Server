@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 
 
+
 namespace StepmaniaServer
 {
     // packet sent to the client by the server in response to the client's
@@ -51,6 +52,7 @@ namespace StepmaniaServer
             // create a memorystream to hold the packet to send
             MemoryStream packetStream = new MemoryStream(Length + 4);
 
+            // write data to the memory stream
             PacketUtils.WriteLength(packetStream, Length);
             PacketUtils.WriteByte(packetStream, (byte)Command);
             PacketUtils.WriteByte(packetStream, (byte)serverProtocolVersion);

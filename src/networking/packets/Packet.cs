@@ -4,6 +4,7 @@ using System.IO;
 using NLog;
 
 
+
 namespace StepmaniaServer
 {
     // abstract class to represent a packet
@@ -21,6 +22,7 @@ namespace StepmaniaServer
         // Packet data (will be populated after packet 'Read')
         public abstract Dictionary<string, object> Data { get; set; }
 
+        // Methods to override when needed
         public abstract void Read(BinaryReader binaryReader);
         public abstract void Write(BinaryWriter binaryWriter, Dictionary<string, object> data);
     }
@@ -29,6 +31,7 @@ namespace StepmaniaServer
     // a regular packet
     abstract class SMOPacket : Packet
     {
+        // SMO Command is another byte using the SMO 'Sub-Protocol'
         public abstract int SMOCommand { get; set; }
     }
 

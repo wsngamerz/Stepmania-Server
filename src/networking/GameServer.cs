@@ -8,12 +8,15 @@ using System.Threading;
 using NLog;
 
 
+
 namespace StepmaniaServer
 {
     class GameServer
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private static Config config = new Config();
+        
         private static TcpListener tcpListener;
         private static List<GameClient> gameClients = new List<GameClient>();
 
@@ -31,7 +34,7 @@ namespace StepmaniaServer
             
             // start the server
             tcpListener.Start();
-            logger.Info("Server starting on {ip}:{port}", IPAddress.Parse(config.Get("/config/game-server/ip", "0.0.0.0")), Convert.ToInt32(config.Get("/config/game-server/port", "8765")));
+            logger.Info("Game server starting on {ip}:{port}", IPAddress.Parse(config.Get("/config/game-server/ip", "0.0.0.0")), Convert.ToInt32(config.Get("/config/game-server/port", "8765")));
 
             // kickstart the thread which handles each of the connected game clients
             gameClientThread = new Thread(GameClientThread);

@@ -3,11 +3,13 @@
 using NLog;
 
 
+
 namespace StepmaniaServer
 {
     class StepmaniaServer
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        
         private static Config config = new Config();
 
         private static Thread gameServerThread;
