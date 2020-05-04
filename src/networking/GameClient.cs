@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Linq;
 
 using NLog;
 
@@ -85,18 +86,65 @@ namespace StepmaniaServer
                                 // NOTE: Password is recieved as either:
                                 //       1. MD5 Hash
                                 //       2. MD5(MD5 hash + salt) where the salt is a plaintext base10 string
-                                logger.Debug("Login attempt recieved -> {username}:{password}", smoPacket.Data["username"], smoPacket.Data["password"]);
-                                
-                                // DEV: Remember to provide some actual authentication here in the future
-                                logger.Warn("Login is currently aunauthenticated, beware!");
+                                logger.Trace("Login attempt recieved -> {username}:{password}", smoPacket.Data["username"], smoPacket.Data["password"]);
 
                                 // create a response packet
                                 Dictionary<string, object> smoLoginData = new Dictionary<string, object>();
                                 Packet smoLoginPacket = new SMOServerLogin();
 
-                                // set the response to a successful login
-                                smoLoginData.Add("success", true);
-                                smoLoginData.Add("loginResponse", "Successfully logged into server");
+                                // check if user exists in the database
+                                // if it does, attempt a login, if it doesn't, create an account with that password
+                                User existingUser = StepmaniaServer.dbContext.Users.Where(s => s.Username == (string)smoPacket.Data["username"]).SingleOrDefault();
+                                logger.Trace("User: {u}", existingUser);
+
+                                // if the username isnt taken, presume a registration attempt
+                                if (existingUser == null)
+                                {
+                                    logger.Trace("User does not exist so persuming that this is a new registration");
+                                    
+                                    // create a user
+                                    User newUser = new User()
+                                    {
+                                        Id = Guid.NewGuid().ToString(),
+                                        Username = (string)smoPacket.Data["username"],
+                                        SMPassword = (string)smoPacket.Data["password"]
+                                    };
+
+                                    // add it to database
+                                    StepmaniaServer.dbContext.Add<User>(newUser);
+
+                                    // apply changes
+                                    StepmaniaServer.dbContext.SaveChanges();
+
+                                    // set the response to a successful login
+                                    smoLoginData.Add("success", true);
+                                    smoLoginData.Add("loginResponse", "Successfully registered on the server");
+
+                                    logger.Info("User {username} has registered an account", newUser.Username);
+                                }
+                                // if the username exists in database, presume a login attempt
+                                else
+                                {
+                                    logger.Trace("User exists, attempting login");
+
+                                    if ((string)smoPacket.Data["password"] == existingUser.SMPassword)
+                                    {
+                                        // set the response to a successful login
+                                        smoLoginData.Add("success", true);
+                                        smoLoginData.Add("loginResponse", "Successfully logged into server");
+
+                                        logger.Info("User {username} has successfully logged in", existingUser.Username);
+                                    }
+                                    else
+                                    {
+                                        // set the response to a unsuccessful login
+                                        smoLoginData.Add("success", false);
+                                        smoLoginData.Add("loginResponse", "Error, Incorrect password");
+
+                                        logger.Warn("Incorrect login from user {username}", existingUser.Username);
+                                    }
+                                }
+
 
                                 // send the packet
                                 smoLoginPacket.Write(tcpWriter, smoLoginData);
