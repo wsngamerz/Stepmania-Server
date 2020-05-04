@@ -42,7 +42,7 @@ namespace StepmaniaServer
                     
                     writer.WriteStartElement("web-server");
                     writer.WriteElementString("enabled", "true");
-                    writer.WriteElementString("ip", "0.0.0.0");
+                    writer.WriteElementString("ip", "localhost");
                     writer.WriteElementString("port", "8080");
                     writer.WriteEndElement();
 

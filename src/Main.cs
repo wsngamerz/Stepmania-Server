@@ -28,6 +28,10 @@ namespace StepmaniaServer
             gameServerThread = new Thread(GameServer.Start);
             gameServerThread.Start();
 
+            // start WebServer thread
+            webServerThread = new Thread(WebsiteServer.Start);
+            webServerThread.Start();
+
             while (isRunning)
             {
                 Thread.Sleep(500);
