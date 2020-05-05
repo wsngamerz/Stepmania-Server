@@ -1,3 +1,6 @@
+![.NET Core](https://github.com/wsngamerz/Stepmania-Server/workflows/.NET%20Core/badge.svg)
+![GitHub repo size](https://img.shields.io/github/repo-size/wsngamerz/Stepmania-Server)
+
 # Stepmania Server: A Stepmania Server
 
 The plan for this project is to have a fully functioning stepmania server with an intergrated web client which can display live games and statistics to all players and all songs played.
