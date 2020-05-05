@@ -21,6 +21,9 @@ namespace StepmaniaServer
         public string clientInformation;
         public int updates;
 
+        public User user = null;
+        public Room currentRoom = null;
+
         private BinaryReader tcpReader;
         private BinaryWriter tcpWriter;
         private NetworkStream tcpStream;
@@ -83,7 +86,42 @@ namespace StepmaniaServer
                     case (int)SMClientCommand.ScreenChanged:
                         switch((SMScreen)packet.Data["screenStatus"])
                         {
+                            case SMScreen.ExitedScreenNetSelectMusic:
+                                ChangeStatus(UserStatus.NONE);
+                                break;
+
+                            case SMScreen.EnteredScreenNetSelectMusic:
+                                ChangeStatus(UserStatus.MUSICSELECTION);
+                                break;
+                            
+                            case SMScreen.NotSent:
+                                ChangeStatus(UserStatus.NONE);
+                                break;
+                            
+                            case SMScreen.EnteredOptionsScreen:
+                                ChangeStatus(UserStatus.OPTIONS);
+                                break;
+                            
+                            case SMScreen.ExitedEvaluationScreen:
+                                ChangeStatus(UserStatus.NONE);
+                                break;
+                            
+                            case SMScreen.EnteredEvaluationScreen:
+                                ChangeStatus(UserStatus.EVALUATION);
+                                break;
+                            
+                            case SMScreen.ExitedScreenNetRoom:
+                                ChangeStatus(UserStatus.NONE);
+                                break;
+                            
                             case SMScreen.EnteredScreenNetRoom:
+                                if (user.CurrentRoom != null)
+                                {
+                                    user.CurrentRoom = null;
+                                }
+                                
+                                ChangeStatus(UserStatus.ROOMSELECTION);
+
                                 UpdateRoomList();
                                 break;
                         }
@@ -140,6 +178,7 @@ namespace StepmaniaServer
                                     smoLoginData.Add("success", true);
                                     smoLoginData.Add("loginResponse", "Successfully registered on the server");
 
+                                    user = StepmaniaServer.dbContext.Users.Where(s => s.Id == newUser.Id).SingleOrDefault();
                                     logger.Info("User {username} has registered an account", newUser.Username);
                                 }
                                 // if the username exists in database, presume a login attempt
@@ -153,6 +192,7 @@ namespace StepmaniaServer
                                         smoLoginData.Add("success", true);
                                         smoLoginData.Add("loginResponse", "Successfully logged into server");
 
+                                        user = existingUser;
                                         logger.Info("User {username} has successfully logged in", existingUser.Username);
                                     }
                                     else
@@ -184,7 +224,7 @@ namespace StepmaniaServer
                                         roomToEnterPassword = "";
                                     }
 
-                                    // attemp authentication for room
+                                    // attempt authentication for room
                                     if (roomToEnterPassword == (string)smoPacket.Data["enterRoomPassword"])
                                     {
                                         logger.Trace("Correct password for room entered, allow room entry");
@@ -203,6 +243,10 @@ namespace StepmaniaServer
                                         // write the packet
                                         smoEnterRoomPacket.Write(tcpWriter, smoEnterRoom);
                                         tcpWriter.Flush();
+
+                                        // Add user to room
+                                        user.CurrentRoom = roomToEnter;
+                                        StepmaniaServer.dbContext.SaveChanges();
                                     }
                                     else
                                     {
@@ -329,6 +373,31 @@ namespace StepmaniaServer
             Packet smoPingPacket = new SMServerPing();
             smoPingPacket.Write(tcpWriter, new Dictionary<string, object>());
             tcpWriter.Flush();
+        }
+
+        public void ChangeStatus(UserStatus userStatus)
+        {
+            if (user != null)
+            {
+                logger.Trace("User {username} Status: {status}", user.Username, userStatus);
+                user.Online = userStatus != UserStatus.NONE;
+                user.Status = userStatus;
+                StepmaniaServer.dbContext.SaveChanges();
+            }
+        }
+
+        // called if the client disconnects for any reason
+        // basically a cleanup method
+        public void Disconnected()
+        {
+            if (user != null)
+            {
+                user.Online = false;
+                user.Status = UserStatus.NONE;
+                user.CurrentRoom = null;
+            }
+
+            StepmaniaServer.dbContext.SaveChanges();
         }
     }
 }

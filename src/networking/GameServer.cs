@@ -81,6 +81,7 @@ namespace StepmaniaServer
                     else
                     {
                         logger.Trace("Client is no longer connected, removing from update list");
+                        gameClient.Disconnected();
                         gameClients.Remove(gameClient);
                         logger.Debug("Client {information} disconnected", gameClient.clientInformation);
                     }

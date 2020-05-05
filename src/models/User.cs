@@ -11,7 +11,8 @@ namespace StepmaniaServer
         ROOMSELECTION = 1,
         MUSICSELECTION = 2,
         OPTIONS = 3,
-        EVALUATION = 4
+        EVALUATION = 4,
+        NONE = 5
     }
 
     public class User
