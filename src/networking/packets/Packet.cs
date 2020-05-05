@@ -92,6 +92,9 @@ namespace StepmaniaServer
                 case (int)SMClientCommand.StyleUpdate:
                     return new SMClientStyleUpdate();
 
+                case (int)SMClientCommand.RequestStartGame:
+                    return new SMClientRequestStartGame();
+
                 case (int)SMClientCommand.ScreenChanged:
                     return new SMClientScreenChanged();
                 
