@@ -7,11 +7,11 @@ namespace StepmaniaServer
 {
     public enum RoomStatus
     {
-        NORMAL = 0,
-        UNUSED = 1,
-        PLAYING = 2,
-        STAGE1 = 3,
-        STAGE2 = 4
+        Normal = 0,
+        Unused = 1,
+        Playing = 2,
+        Stage1 = 3,
+        Stage2 = 4
     }
 
     public class Room

@@ -87,31 +87,31 @@ namespace StepmaniaServer
                         switch((SMScreen)packet.Data["screenStatus"])
                         {
                             case SMScreen.ExitedScreenNetSelectMusic:
-                                ChangeStatus(UserStatus.NONE);
+                                ChangeStatus(UserStatus.None);
                                 break;
 
                             case SMScreen.EnteredScreenNetSelectMusic:
-                                ChangeStatus(UserStatus.MUSICSELECTION);
+                                ChangeStatus(UserStatus.MusicSelection);
                                 break;
                             
                             case SMScreen.NotSent:
-                                ChangeStatus(UserStatus.NONE);
+                                ChangeStatus(UserStatus.None);
                                 break;
                             
                             case SMScreen.EnteredOptionsScreen:
-                                ChangeStatus(UserStatus.OPTIONS);
+                                ChangeStatus(UserStatus.Options);
                                 break;
                             
                             case SMScreen.ExitedEvaluationScreen:
-                                ChangeStatus(UserStatus.NONE);
+                                ChangeStatus(UserStatus.None);
                                 break;
                             
                             case SMScreen.EnteredEvaluationScreen:
-                                ChangeStatus(UserStatus.EVALUATION);
+                                ChangeStatus(UserStatus.Evaluation);
                                 break;
                             
                             case SMScreen.ExitedScreenNetRoom:
-                                ChangeStatus(UserStatus.NONE);
+                                ChangeStatus(UserStatus.None);
                                 break;
                             
                             case SMScreen.EnteredScreenNetRoom:
@@ -120,7 +120,7 @@ namespace StepmaniaServer
                                     user.CurrentRoom = null;
                                 }
                                 
-                                ChangeStatus(UserStatus.ROOMSELECTION);
+                                ChangeStatus(UserStatus.RoomSelection);
 
                                 UpdateRoomList();
                                 break;
@@ -263,7 +263,7 @@ namespace StepmaniaServer
                                     Name = (string)smoPacket.Data["newRoomName"],
                                     Description = (string)smoPacket.Data["newRoomDescription"],
                                     Password = (string)smoPacket.Data["newRoomPassword"],
-                                    Status = RoomStatus.NORMAL
+                                    Status = RoomStatus.Normal
                                 };
 
                                 // add to database and apply changes
@@ -380,7 +380,7 @@ namespace StepmaniaServer
             if (user != null)
             {
                 logger.Trace("User {username} Status: {status}", user.Username, userStatus);
-                user.Online = userStatus != UserStatus.NONE;
+                user.Online = userStatus != UserStatus.None;
                 user.Status = userStatus;
                 StepmaniaServer.dbContext.SaveChanges();
             }
@@ -393,7 +393,7 @@ namespace StepmaniaServer
             if (user != null)
             {
                 user.Online = false;
-                user.Status = UserStatus.NONE;
+                user.Status = UserStatus.None;
                 user.CurrentRoom = null;
             }
 

@@ -18,11 +18,11 @@ namespace StepmaniaServer
 
     public enum SongStatisticDifficulty
     {
-        BEGINNER = 0,
-        EASY = 1,
-        MEDIUM = 2,
-        HARD = 3,
-        EXPERT = 4
+        Beginner = 0,
+        Easy = 1,
+        Medium = 2,
+        Hard = 3,
+        Expert = 4
     }
     
     public class SongStatistic

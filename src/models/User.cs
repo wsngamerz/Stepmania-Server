@@ -7,12 +7,12 @@ namespace StepmaniaServer
 {
     public enum UserStatus
     {
-        SPECTATOR = 0,
-        ROOMSELECTION = 1,
-        MUSICSELECTION = 2,
-        OPTIONS = 3,
-        EVALUATION = 4,
-        NONE = 5
+        Spectator = 0,
+        RoomSelection = 1,
+        MusicSelection = 2,
+        Options = 3,
+        Evaluation = 4,
+        None = 5
     }
 
     public class User
