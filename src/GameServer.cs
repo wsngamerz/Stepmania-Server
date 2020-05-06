@@ -26,14 +26,13 @@ namespace StepmaniaServer
         {
             logger.Info("Started game server thread");
             // create the server
+            // and set the timeout options which are in config file
+            // then start the server
             tcpListener = new TcpListener(IPAddress.Parse(config.Get("/config/game-server/ip", "0.0.0.0")), Convert.ToInt32(config.Get("/config/game-server/port", "8765")));
-            
-            // set the timeout options which are in config file
             tcpListener.Server.ReceiveTimeout = Convert.ToInt32(config.Get("/config/game-server/timeout", "1000"));
             tcpListener.Server.SendTimeout = Convert.ToInt32(config.Get("/config/game-server/timeout", "1000"));
-            
-            // start the server
             tcpListener.Start();
+            
             logger.Info("Game server starting on {ip}:{port}", IPAddress.Parse(config.Get("/config/game-server/ip", "0.0.0.0")), Convert.ToInt32(config.Get("/config/game-server/port", "8765")));
 
             // kickstart the thread which handles each of the connected game clients
