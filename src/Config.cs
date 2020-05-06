@@ -39,6 +39,19 @@ namespace StepmaniaServer
                     writer.WriteComment("Stepmainia Server aspires to be extremly configurable so here you go");
                     writer.WriteStartElement("config");
 
+                    // start logging config options
+                    writer.WriteComment("Config options relating to logging");
+                    writer.WriteStartElement("logging");
+
+                    writer.WriteComment("level: The log level to output");
+                    writer.WriteElementString("level", "Info");
+
+                    writer.WriteComment("path: The path to the output log file");
+                    writer.WriteElementString("path", "${currentdir}/Logs/stepmaniaserver.log");
+
+                    writer.WriteEndElement();
+                    // end logging config
+
                     // start game-server config options
                     writer.WriteComment("Config options relating to the game server");
                     writer.WriteStartElement("game-server");
@@ -66,7 +79,7 @@ namespace StepmaniaServer
                     writer.WriteStartElement("web-server");
                     
                     writer.WriteComment("enabled: [true/false] - whether to enable the embedded web server or not");
-                    writer.WriteElementString("enabled", "true");
+                    writer.WriteElementString("enabled", "false");
                     
                     writer.WriteComment("ip: the ip to host the web server on");
                     writer.WriteElementString("ip", "localhost");

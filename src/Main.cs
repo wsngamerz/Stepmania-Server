@@ -48,7 +48,7 @@ namespace StepmaniaServer
         private static void SetupLogging()
         {
             // setup the configuration for logging
-            NLog.Config.LoggingConfiguration config = new NLog.Config.LoggingConfiguration();
+            NLog.Config.LoggingConfiguration loggingConfiguration = new NLog.Config.LoggingConfiguration();
 
             // Targets where to log to: File and Console
             string loggingFormat = @"[${date:format=HH\:mm\:ss}] [${callsite}] [${level}] ${message} ${exception}";
@@ -56,7 +56,7 @@ namespace StepmaniaServer
             // Logging config for log file
             NLog.Targets.FileTarget logfile = new NLog.Targets.FileTarget("logfile")
             {
-                FileName = "${currentdir}/Logs/stepmaniaserver.log",
+                FileName = config.Get("/config/logging/path", "${currentdir}/Logs/stepmaniaserver.log"),
                 Layout = loggingFormat,
                 ArchiveNumbering = NLog.Targets.ArchiveNumberingMode.Rolling,
                 ArchiveEvery = NLog.Targets.FileArchivePeriod.Day
@@ -68,10 +68,38 @@ namespace StepmaniaServer
                 Layout = loggingFormat
             };
 
+            LogLevel loggingLevel = LogLevel.Info;
+            switch (config.Get("/config/logging/level"))
+            {
+                case "Trace":
+                    loggingLevel = LogLevel.Trace;
+                    break;
+                
+                case "Debug":
+                    loggingLevel = LogLevel.Debug;
+                    break;
+                
+                case "Info":
+                    loggingLevel = LogLevel.Info;
+                    break;
+                
+                case "Warning":
+                    loggingLevel = LogLevel.Warn;
+                    break;
+                
+                case "Error":
+                    loggingLevel = LogLevel.Error;
+                    break;
+                
+                case "Fatal":
+                    loggingLevel = LogLevel.Fatal;
+                    break;
+            }
+
             // Apply the rules!
-            config.AddRule(LogLevel.Trace, LogLevel.Fatal, logconsole);
-            config.AddRule(LogLevel.Trace, LogLevel.Fatal, logfile);
-            NLog.LogManager.Configuration = config;
+            loggingConfiguration.AddRule(loggingLevel, LogLevel.Fatal, logconsole);
+            loggingConfiguration.AddRule(loggingLevel, LogLevel.Fatal, logfile);
+            NLog.LogManager.Configuration = loggingConfiguration;
 
             logger.Trace("Setting up logging");
         }
