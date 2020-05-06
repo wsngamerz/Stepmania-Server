@@ -54,6 +54,7 @@ namespace StepmaniaServer
             try
             {
                 binaryWriter.Write(packetPayload);
+                binaryWriter.Flush();
             }
             catch (Exception e)
             {

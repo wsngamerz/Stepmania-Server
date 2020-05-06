@@ -58,6 +58,7 @@ namespace StepmaniaServer
 
             // send the byte array
             binaryWriter.Write(packetPayload);
+            binaryWriter.Flush();
         }
     }
 

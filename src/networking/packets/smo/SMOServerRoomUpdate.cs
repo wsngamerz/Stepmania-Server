@@ -112,6 +112,7 @@ namespace StepmaniaServer
             // send bytearray to client
             logger.Trace("Sending Room Update: {payload}", PacketUtils.ByteArrayToString(packetPayload));
             binaryWriter.Write(packetPayload);
+            binaryWriter.Flush();
         }
     }
 }
