@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using NLog;
 
 
 
@@ -6,29 +6,13 @@ namespace StepmaniaServer
 {
     class GameRoom
     {
-        Room room = null;
-        List<GameClient> roomClients = new List<GameClient>();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        public GameRoom(Room _room = null)
+        private static Config config = new Config();
+        
+        public GameRoom()
         {
-            if (_room == null)
-            {
-                _room = new Room();
-                _room.Name = "Fake Room";
-                _room.Description = "A dummy room that all clients are added to before joining an actual room";
-            }
 
-            room = _room;
-        }
-
-        public void AddClient(GameClient client)
-        {
-            roomClients.Add(client);
-        }
-
-        public void RemoveClient(GameClient client)
-        {
-            roomClients.Remove(client);
         }
     }
 }
