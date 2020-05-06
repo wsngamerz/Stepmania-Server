@@ -23,16 +23,23 @@ namespace StepmaniaServer
             SetupLogging();
             logger.Info("StepmaniaServer ALPHA [{servername}] Starting", config.Get("/config/game-server/name", "Unknown Server Name"));
 
+            if (Thread.CurrentThread.Name == null)
+            {
+                Thread.CurrentThread.Name = "MainThread";
+            }
+
             SetupDatabases();
 
             // start GameServer thread
             gameServerThread = new Thread(GameServer.Start);
+            gameServerThread.Name = "GameServerThread";
             gameServerThread.Start();
 
             // start WebServer thread if enabled
             if (config.Get("/config/web-server/enabled", "true") == "true")
             {
                 webServerThread = new Thread(WebsiteServer.Start);
+                webServerThread.Name = "WebServerThread";
                 webServerThread.Start();
             }
 

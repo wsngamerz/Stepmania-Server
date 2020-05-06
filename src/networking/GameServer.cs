@@ -38,6 +38,7 @@ namespace StepmaniaServer
 
             // kickstart the thread which handles each of the connected game clients
             gameClientThread = new Thread(GameClientThread);
+            gameClientThread.Name = "GameClientThread";
             gameClientThread.Start();
 
             // start the main server loop
