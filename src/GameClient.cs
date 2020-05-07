@@ -75,6 +75,7 @@ namespace StepmaniaServer
 
                     case SMClientCommand.ScreenChanged:
                         CurrentScreen = (SMScreen)recievedPacket.Data["screenStatus"];
+                        HandleScreenChange();
                         break;
                     
                     case SMClientCommand.SMOnlinePacket:
@@ -113,12 +114,44 @@ namespace StepmaniaServer
                     break;
                 
                 case SMOClientCommand.EnterRoom:
+                    bool isEnter = (bool)packet.Data["isEnter"];
+
+                    if (isEnter)
+                    {
+                        string roomName = (string)packet.Data["enterRoomName"];
+                        string roomPassword = (string)packet.Data["enterRoomPassword"];
+                        Room room = StepmaniaServer.dbContext.Rooms.Where(s => s.Name == roomName).SingleOrDefault();
+                        bool successfullyEntered = CurrentRoom.RoomManager.EnterRoom(room, roomPassword, this);
+
+                        if (successfullyEntered)
+                        {
+                            SendRoomEntered(roomName, room.Description);
+                        }
+                    }
                     break;
                 
                 case SMOClientCommand.CreateRoom:
+                    string name = (string)packet.Data["newRoomName"];
+                    string description = (string)packet.Data["newRoomDescription"];
+                    string password = (string)packet.Data["newRoomPassword"];
+                    
+                    CurrentRoom.RoomManager.CreateRoom(name, description, password);
+                    SendRoomList();
                     break;
                 
                 case SMOClientCommand.RoomInfo:
+                    break;
+            }
+        }
+
+        private void HandleScreenChange()
+        {
+            switch (CurrentScreen)
+            {
+                case SMScreen.EnteredScreenNetRoom:
+                    logger.Trace("Client entered room selection screen");
+                    SendRoomList();
+                    CurrentRoom.RoomManager.MoveToDummyRoom(this);
                     break;
             }
         }
@@ -204,6 +237,52 @@ namespace StepmaniaServer
             packetData.Add("loginResponse", loginResponse);
 
             // send packet
+            packet.Write(tcpWriter, packetData);
+        }
+
+        // send list of rooms
+        private void SendRoomList()
+        {
+            List<Room> rooms = StepmaniaServer.dbContext.Rooms.ToList();
+            List<Tuple<string, string>> formattedRooms = new List<Tuple<string, string>>();
+
+            // pull all required data and place in a List of Tuples
+            foreach (Room room in rooms)
+            {
+                string roomName = room.Name;
+                string roomDescription = room.Description;
+
+                formattedRooms.Add(new Tuple<string, string>(roomName, roomDescription));
+            }
+
+            // create a packet and a dictionary to store packet data
+            SMOPacket packet = new SMOServerRoomUpdate();
+            Dictionary<string, object> packetData = new Dictionary<string, object>();
+
+            // add data to packet to send
+            packetData.Add("update", "rooms");
+            packetData.Add("numberRooms", formattedRooms.Count);
+            packetData.Add("rooms", formattedRooms);
+
+            // send packet
+            packet.Write(tcpWriter, packetData);
+        }
+
+        // send room entered
+        private void SendRoomEntered(string name, string description)
+        {
+            // create a packet and a dictionary to store packet data
+            SMOPacket packet = new SMOServerRoomUpdate();
+            Dictionary<string, object> packetData = new Dictionary<string, object>();
+
+            // add data to packet to send
+            packetData.Add("update", "title");
+            packetData.Add("roomTitle", name);
+            packetData.Add("roomDescription", description);
+            packetData.Add("isGame", true);
+            packetData.Add("allowSubroom", false);
+
+            //send packet
             packet.Write(tcpWriter, packetData);
         }
     }
