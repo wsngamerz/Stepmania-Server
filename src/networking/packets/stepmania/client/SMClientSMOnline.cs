@@ -73,6 +73,8 @@ namespace StepmaniaServer
                     loginData.Add("username", username);
                     loginData.Add("password", password);
                     Data = loginData;
+
+                    logger.Trace("[SMO] Login - Player Number: {playerNum} - Encrypted: {encrypted} - Username: {username} - Password: {password}", playerNumber, isEncrypted, username, password);
                     break;
                 
                 // Client entering/exiting room
@@ -92,6 +94,8 @@ namespace StepmaniaServer
                     enterRoomData.Add("enterRoomName", enterRoomName);
                     enterRoomData.Add("enterRoomPassword", enterRoomPassword);
                     Data = enterRoomData;
+
+                    logger.Trace("[SMO] {enterExit} Room - Name: {roomName} - Password: {roomPassword}", isEnter ? "Entering" : "Leaving", enterRoomName, enterRoomPassword);
                     break;
                 
                 // client creates a new room
@@ -120,6 +124,8 @@ namespace StepmaniaServer
                     createRoomData.Add("newRoomDescription", newRoomDescription);
                     createRoomData.Add("newRoomPassword", newRoomPassword);
                     Data = createRoomData;
+
+                    logger.Trace("[SMO] Create Room - Name: {roomName} - Description: {roomDescription} - Password: {roomPassword}", newRoomName, newRoomDescription, newRoomPassword);
                     break;
                 
                 // Client is requesting room information
@@ -130,6 +136,8 @@ namespace StepmaniaServer
                     Dictionary<string, object> roomInfoData = new Dictionary<string, object>();
                     roomInfoData.Add("roomName", roomName);
                     Data = roomInfoData;
+
+                    logger.Trace("[SMO] Room Info - Name: {roomName}", roomName);
                     break;
             }
         }

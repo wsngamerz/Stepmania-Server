@@ -49,6 +49,8 @@ namespace StepmaniaServer
             data.Add("clientProtocolVersion", ClientProtocolVersion);
             data.Add("clientBuild", ClientBuild);
             Data = data;
+
+            logger.Trace("Recieved Hello from client {build} protocol {protocol}", ClientBuild, ClientProtocolVersion);
         }
 
         public override void Write(BinaryWriter binaryWriter, Dictionary<string, object> data) { }

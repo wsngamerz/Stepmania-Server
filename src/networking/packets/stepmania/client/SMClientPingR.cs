@@ -30,7 +30,10 @@ namespace StepmaniaServer
         }
 
         // The ping response packet has no payload so no parsing takes place
-        public override void Read(BinaryReader binaryReader) { }
+        public override void Read(BinaryReader binaryReader)
+        {
+            logger.Trace("Recieved Ping Response");
+        }
 
         public override void Write(BinaryWriter binaryWriter, Dictionary<string, object> data) { }
     }

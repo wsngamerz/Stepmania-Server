@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using NLog;
-
 
 
 namespace StepmaniaServer
@@ -12,7 +10,6 @@ namespace StepmaniaServer
     // the client is still connected properly
     class SMServerPing : Packet
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private int _length;
         private int _command;
         private Dictionary<string, object> _data;
@@ -51,6 +48,7 @@ namespace StepmaniaServer
 
             // convert MemoryStream to byte array
             byte[] packetPayload = packetStream.GetBuffer();
+            logger.Trace("Sending Ping, {payload}", PacketUtils.ByteArrayToString(packetPayload));
 
             // send the byte array
             try

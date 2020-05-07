@@ -43,6 +43,8 @@ namespace StepmaniaServer
             data.Add("player1Options", Player1Options);
             data.Add("player2Options", Player2Options);
             Data = data;
+            
+            logger.Trace("Recieved PlayerOptions: [1: {p1o}] [2: {p2o}]", Player1Options, Player2Options);
         }
 
         public override void Write(BinaryWriter binaryWriter, Dictionary<string, object> data) { }

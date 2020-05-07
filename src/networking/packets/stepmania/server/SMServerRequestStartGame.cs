@@ -54,6 +54,7 @@ namespace StepmaniaServer
 
             // convert MemoryStream to byte array
             byte[] packetPayload = packetStream.GetBuffer();
+            logger.Trace("Packet {command} sending {payload}", Command, PacketUtils.ByteArrayToString(packetPayload));
 
             // send the byte array
             binaryWriter.Write(packetPayload);

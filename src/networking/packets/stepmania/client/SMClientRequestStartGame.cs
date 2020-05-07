@@ -48,6 +48,8 @@ namespace StepmaniaServer
             data.Add("requestedSongArtist", RequestedSongArtist);
             data.Add("requestedSongSubtitle", RequestedSongSubtitle);
             Data = data;
+
+            logger.Trace("Recieved RequestStartGame from client - Status: {status}, Title: {title}, Subtitle: {subtitle}, Artist: {artist}", Status, RequestedSongTitle, RequestedSongSubtitle, RequestedSongArtist);
         }
 
         public override void Write(BinaryWriter binaryWriter, Dictionary<string, object> data) { }

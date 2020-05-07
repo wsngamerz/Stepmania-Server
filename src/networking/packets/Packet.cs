@@ -9,7 +9,10 @@ namespace StepmaniaServer
 {
     // abstract class to represent a packet
     abstract class Packet
-    {       
+    {
+        // Logger
+        public static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        
         // Packet length (first 4 bytes of a packet)
         public abstract int Length { get; set; }
 
@@ -37,7 +40,6 @@ namespace StepmaniaServer
     // and the payload and outputs it in the log for development
     class UnknownPacket : Packet
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private int _length;
         private int _command;
         private Dictionary<string, object> _data;
