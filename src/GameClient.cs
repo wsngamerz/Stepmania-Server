@@ -78,6 +78,8 @@ namespace StepmaniaServer
                         break;
                     
                     case SMClientCommand.SMOnlinePacket:
+                        SMOPacket smoPacket = (SMOPacket)recievedPacket;
+                        HandleSMOPacket(smoPacket);
                         break;
                 }
             }
@@ -101,6 +103,79 @@ namespace StepmaniaServer
             return packetRecieved;
         }
 
+        // decide what to do with the smo packet
+        private void HandleSMOPacket(SMOPacket packet)
+        {
+            switch((SMOClientCommand)packet.SMOCommand)
+            {
+                case SMOClientCommand.Login:
+                    LoginUser(packet);
+                    break;
+                
+                case SMOClientCommand.EnterRoom:
+                    break;
+                
+                case SMOClientCommand.CreateRoom:
+                    break;
+                
+                case SMOClientCommand.RoomInfo:
+                    break;
+            }
+        }
+
+        private void LoginUser(SMOPacket packet)
+        {
+            string username = (string)packet.Data["username"];
+            string password = (string)packet.Data["password"];
+
+            User existingUser = StepmaniaServer.dbContext.Users.Where(s => s.Username == username).SingleOrDefault();
+
+            if (existingUser == null)
+            {
+                // register new account
+                User newUser = new User()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Username = username,
+                    SMPassword = password
+                };
+
+                StepmaniaServer.dbContext.Add<User>(newUser);
+                StepmaniaServer.dbContext.SaveChanges();
+
+                // save user and send client a response
+                SetUser(username, newUser);
+                SendLoginResponse(true, "Successfully registered new account");
+            }
+            else
+            {
+                // attempt a login
+                if (password == existingUser.SMPassword)
+                {
+                    // successful login
+                    SetUser(username, existingUser);
+                    SendLoginResponse(true, "Successfully logged in");
+                }
+                else {
+                    // unsuccessful login
+                    SendLoginResponse(false, "Incorrect password");
+                }
+            }
+        }
+
+        private void SetUser(string username, User user)
+        {
+            if (username == Player1Name)
+            {
+                Player1 = user;
+                logger.Info("[Player 1] {username} successfully logged in", username);
+            }
+            else {
+                Player2 = user;
+                logger.Info("[Player 2] {username} successfully logged in", username);
+            }
+        }
+
         // send a hello to the client
         private void SendHello()
         {
@@ -115,6 +190,21 @@ namespace StepmaniaServer
 
             // send packet
             packet.Write(tcpWriter, packetData);
-        } 
+        }
+
+        // send login response
+        private void SendLoginResponse(bool isSuccess, string loginResponse)
+        {
+            // create a packet and a dictionary to store packet data
+            SMOPacket packet = new SMOServerLogin();
+            Dictionary<string, object> packetData = new Dictionary<string, object>();
+
+            // add data to packet to send
+            packetData.Add("isSuccess", isSuccess);
+            packetData.Add("loginResponse", loginResponse);
+
+            // send packet
+            packet.Write(tcpWriter, packetData);
+        }
     }
 }
