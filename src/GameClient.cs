@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 
 using NLog;
@@ -12,12 +14,14 @@ namespace StepmaniaServer
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private static Config config = new Config();
+
         private TcpClient tcpClient;
         private NetworkStream tcpStream;
         private BinaryReader tcpReader;
         private BinaryWriter tcpWriter;
 
         public GameRoom CurrentRoom;
+        public SMScreen CurrentScreen;
         public string ClientBuild;
         public int ClientProtocolVersion;
 
@@ -48,6 +52,7 @@ namespace StepmaniaServer
                         break;
                     
                     case SMClientCommand.ScreenChanged:
+                        CurrentScreen = (SMScreen)recievedPacket.Data["screenStatus"];
                         break;
                     
                     case SMClientCommand.SMOnlinePacket:
@@ -62,6 +67,7 @@ namespace StepmaniaServer
             // read the packet length and packet command from stream
             int packetLength = PacketUtils.ReadLength(tcpReader);
             byte packetCommand = PacketUtils.ReadByte(tcpReader);
+            logger.Trace("Recieved {packet} length {length}", (SMClientCommand)packetCommand, packetLength);
 
             // get the packet recieved
             Packet packetRecieved = PacketFactory.GetPacket(packetCommand);

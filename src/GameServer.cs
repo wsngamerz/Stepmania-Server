@@ -32,6 +32,7 @@ namespace StepmaniaServer
             tcpListener.Server.SendTimeout = serverTimeout;
             tcpListener.Server.ReceiveTimeout = serverTimeout;
             tcpListener.Start();
+            logger.Info("Starting the game server at {ip}:{port}", serverIp, serverPort);
 
             // create game room manager
             gameRoomManager = new GameRoomManager();
