@@ -51,8 +51,6 @@ namespace StepmaniaServer
             data.Add("playerNum", PlayerNum);
             data.Add("playerName", PlayerName);
             Data = data;
-
-            logger.Trace("Recieved Style Update - Players: {players} ID: {playerID} Name: {playerName}", NumPlayers, PlayerNum, PlayerName);
         }
 
         public override void Write(BinaryWriter binaryWriter, Dictionary<string, object> data) { }

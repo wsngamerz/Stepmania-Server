@@ -83,7 +83,6 @@ namespace StepmaniaServer
 
             // convert to bytearray
             byte[] packetPayload = packetStream.GetBuffer();
-            logger.Trace("Sending Room Info: {payload}", PacketUtils.ByteArrayToString(packetPayload));
 
             // send packet
             binaryWriter.Write(packetPayload);
