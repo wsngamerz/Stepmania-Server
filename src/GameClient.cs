@@ -25,6 +25,12 @@ namespace StepmaniaServer
         public string ClientBuild;
         public int ClientProtocolVersion;
 
+        public int NumberPlayers;
+        public User Player1;
+        public User Player2;
+        public string Player1Name;
+        public string Player2Name;
+
         // the game client is a representation of a connection to the server
         public GameClient(TcpClient clientConnection)
         {
@@ -48,9 +54,25 @@ namespace StepmaniaServer
                     case SMClientCommand.Hello:
                         ClientBuild = (string)recievedPacket.Data["clientBuild"];
                         ClientProtocolVersion = (int)recievedPacket.Data["clientProtocolVersion"];
+
+                        logger.Trace("Connection request from client {clientInfo} build {build} protocol {protocol}", tcpClient.Client.RemoteEndPoint.ToString(), ClientBuild, ClientProtocolVersion);
+
                         SendHello();
                         break;
                     
+                    case SMClientCommand.StyleUpdate:
+                        NumberPlayers = (int)recievedPacket.Data["numPlayers"];
+                        
+                        object player1Name;
+                        object player2Name;
+                        
+                        recievedPacket.Data.TryGetValue("player1Name", out player1Name);
+                        recievedPacket.Data.TryGetValue("player2Name", out player2Name);
+                        
+                        Player1Name = (string)player1Name;
+                        Player2Name = (string)player2Name;
+                        break;
+
                     case SMClientCommand.ScreenChanged:
                         CurrentScreen = (SMScreen)recievedPacket.Data["screenStatus"];
                         break;
