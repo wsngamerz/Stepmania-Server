@@ -31,15 +31,15 @@ namespace StepmaniaServer
             SetupDatabases();
 
             // start GameServer thread
-            gameServerThread = new Thread(GameServer.Start);
-            gameServerThread.Name = "GameServerThread";
+            gameServerThread = new Thread(() => new GameServer());
+            gameServerThread.Name = "GameServer Thread";
             gameServerThread.Start();
 
             // start WebServer thread if enabled
             if (config.Get("/config/web-server/enabled", "true") == "true")
             {
-                webServerThread = new Thread(WebsiteServer.Start);
-                webServerThread.Name = "WebServerThread";
+                webServerThread = new Thread(() => new WebServer());
+                webServerThread.Name = "WebServer Thread";
                 webServerThread.Start();
             }
 

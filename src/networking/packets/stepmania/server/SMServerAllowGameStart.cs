@@ -8,7 +8,7 @@ namespace StepmaniaServer
 {
     // packet sent to the client by the server to check whether
     // the client is still connected properly
-    class SMServerPing : Packet
+    class SMServerAllowGameStart : Packet
     {
         private int _length;
         private int _command;
@@ -22,7 +22,7 @@ namespace StepmaniaServer
 
         public override int Command
         {
-            get { return (int)SMServerCommand.Ping; }
+            get { return (int)SMServerCommand.AllowGameStart; }
             set { _command = value; }
         }
 
@@ -38,9 +38,6 @@ namespace StepmaniaServer
             // calculate the length of the packet
             Length = 1;
 
-            // NOTE: A ping packet has no payload so only the length of the
-            //       packet and the packet command are sent (5 bytes total)
-
             // create a memorystream to hold the packet to send
             MemoryStream packetStream = new MemoryStream(Length + 4);
             PacketUtils.WriteLength(packetStream, Length);
@@ -48,20 +45,11 @@ namespace StepmaniaServer
 
             // convert MemoryStream to byte array
             byte[] packetPayload = packetStream.GetBuffer();
-            logger.Trace("Sending Ping, {payload}", PacketUtils.ByteArrayToString(packetPayload));
+            logger.Trace("Sending allow game start");
 
             // send the byte array
-            try
-            {
-                binaryWriter.Write(packetPayload);
-                binaryWriter.Flush();
-            }
-            catch (Exception e)
-            {
-                // if there is an error, it probably means that the client has disconnected but
-                // log it as a warning anyways just in case an error that was not expected occurs
-                logger.Warn(e, "Error sending ping, client disconnected?");
-            }
+            binaryWriter.Write(packetPayload);
+            binaryWriter.Flush();
         }
     }
 }

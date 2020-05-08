@@ -87,6 +87,7 @@ namespace StepmaniaServer
 
             // send packet
             binaryWriter.Write(packetPayload);
+            binaryWriter.Flush();
         }
     }
 }

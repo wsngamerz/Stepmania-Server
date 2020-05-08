@@ -86,7 +86,10 @@ namespace StepmaniaServer
                     string enterRoomName = PacketUtils.ReadNTString(binaryReader);
 
                     // room password (empty if unused)
-                    string enterRoomPassword = PacketUtils.ReadNTString(binaryReader);
+                    string enterRoomPassword = null;
+                    if (Length > (4 + enterRoomName.Length)) {
+                        enterRoomPassword = PacketUtils.ReadNTString(binaryReader);
+                    }
 
                     // store all of the parsed data in the Data dictionary
                     Dictionary<string, object> enterRoomData = new Dictionary<string, object>();

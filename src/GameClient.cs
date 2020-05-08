@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Sockets;
 using System.Linq;
+using System.Net.Sockets;
 
 using NLog;
 
@@ -10,394 +10,340 @@ using NLog;
 
 namespace StepmaniaServer
 {
-    // represents a connected client
     class GameClient
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         private static Config config = new Config();
 
-        public TcpClient tcpClient;
-        public string clientInformation;
-        public int updates;
-
-        public User user = null;
-        public Room currentRoom = null;
-
+        private TcpClient tcpClient;
+        private NetworkStream tcpStream;
         private BinaryReader tcpReader;
         private BinaryWriter tcpWriter;
-        private NetworkStream tcpStream;
 
-        public GameClient(TcpClient client)
+        public GameRoom CurrentRoom;
+        public SMScreen CurrentScreen;
+        public string ClientBuild;
+        public int ClientProtocolVersion;
+
+        public int NumberPlayers;
+        public User Player1;
+        public User Player2;
+        public string Player1Name;
+        public string Player2Name;
+
+        // the game client is a representation of a connection to the server
+        public GameClient(TcpClient clientConnection)
         {
-            // store client information and TCP class
-            tcpClient = client;
-            clientInformation = tcpClient.Client.RemoteEndPoint.ToString();
-            updates = 0;
-            tcpStream = tcpClient.GetStream();
-
-            // set config options
-            tcpStream.ReadTimeout = Convert.ToInt32(config.Get("/config/game-server/timeout", "1000"));
+            tcpClient = clientConnection;
+            tcpStream = clientConnection.GetStream();
             tcpReader = new BinaryReader(tcpStream);
             tcpWriter = new BinaryWriter(tcpStream);
         }
 
+        // check for new packets sent by the client
         public void Update()
         {
-            // increment the number of updates
-            updates++;
-
-            // if client has sent data that has been recieved by the server
             if (tcpClient.Available > 0)
             {
-                // read the length of the packet (first 4 bytes)
-                int packetLength = PacketUtils.ReadLength(tcpReader);
-                // read the command of the packet (next 1 byte)
-                byte command = PacketUtils.ReadByte(tcpReader);
+                // read the packet that has been recieved
+                Packet recievedPacket = ReadPacket();
 
-                // gets the class which handles that specific packet
-                Packet packet = PacketFactory.GetPacket(command);
-                packet.Length = packetLength;
-                packet.Command = command;
-
-                // get the packet class to parse the rest of the payload of the packet
-                packet.Read(tcpReader);
-
-                // decide what to do for each kind of packet
-                switch (command)
+                // decide what to do with each packet command
+                switch((SMClientCommand)recievedPacket.Command)
                 {
-                    case (int)SMClientCommand.Hello:
-                        // if recieved a hello from the client, that means that the client wants to
-                        // connect to respond with server information
-                        Dictionary<string, object> smHelloData = new Dictionary<string, object>();
-                        Packet smHelloPacket = new SMServerHello();
+                    case SMClientCommand.Ping:
+                        break;
 
-                        // add data to packet to send
-                        smHelloData.Add("serverProtocolVersion", Convert.ToInt32(config.Get("/config/game-server/protocol", "128")));
-                        smHelloData.Add("serverName", config.Get("/config/game-server/name", "A Stepmania Server"));
-                        // TODO: add this random key to the config file
-                        smHelloData.Add("randomKey", new byte[] { 0, 0, 0, 0 });
+                    case SMClientCommand.PingR:
+                        logger.Trace("Recieved a ping response");
+                        break;
 
-                        // send the packet
-                        smHelloPacket.Write(tcpWriter, smHelloData);
-                        tcpWriter.Flush();
+                    case SMClientCommand.Hello:
+                        ClientBuild = (string)recievedPacket.Data["clientBuild"];
+                        ClientProtocolVersion = (int)recievedPacket.Data["clientProtocolVersion"];
+
+                        logger.Trace("Connection request from client {clientInfo} build {build} protocol {protocol}", tcpClient.Client.RemoteEndPoint.ToString(), ClientBuild, ClientProtocolVersion);
+
+                        SendHello();
                         break;
                     
-                    case (int)SMClientCommand.ScreenChanged:
-                        switch((SMScreen)packet.Data["screenStatus"])
-                        {
-                            case SMScreen.ExitedScreenNetSelectMusic:
-                                ChangeStatus(UserStatus.None);
-                                break;
-
-                            case SMScreen.EnteredScreenNetSelectMusic:
-                                ChangeStatus(UserStatus.MusicSelection);
-                                break;
-                            
-                            case SMScreen.NotSent:
-                                ChangeStatus(UserStatus.None);
-                                break;
-                            
-                            case SMScreen.EnteredOptionsScreen:
-                                ChangeStatus(UserStatus.Options);
-                                break;
-                            
-                            case SMScreen.ExitedEvaluationScreen:
-                                ChangeStatus(UserStatus.None);
-                                break;
-                            
-                            case SMScreen.EnteredEvaluationScreen:
-                                ChangeStatus(UserStatus.Evaluation);
-                                break;
-                            
-                            case SMScreen.ExitedScreenNetRoom:
-                                ChangeStatus(UserStatus.None);
-                                break;
-                            
-                            case SMScreen.EnteredScreenNetRoom:
-                                if (user.CurrentRoom != null)
-                                {
-                                    user.CurrentRoom = null;
-                                }
-                                
-                                ChangeStatus(UserStatus.RoomSelection);
-
-                                UpdateRoomList();
-                                break;
-                        }
+                    case SMClientCommand.GameStartRequest:
+                        CurrentRoom.ClientReady();
                         break;
                     
-                    case (int)SMClientCommand.SMOnlinePacket:
-                        // if the packet is a StepMania Online packet, do a bit more work as it
-                        // is basically an encapsulated packet
+                    case SMClientCommand.GameOverNotice:
+                        break;
+                    
+                    case SMClientCommand.GameStatusUpdate:
+                        break;
+                    
+                    case SMClientCommand.StyleUpdate:
+                        NumberPlayers = (int)recievedPacket.Data["numPlayers"];
+                        
+                        object player1Name;
+                        object player2Name;
+                        
+                        recievedPacket.Data.TryGetValue("player1Name", out player1Name);
+                        recievedPacket.Data.TryGetValue("player2Name", out player2Name);
+                        
+                        Player1Name = (string)player1Name;
+                        Player2Name = (string)player2Name;
+                        break;
+                    
+                    case SMClientCommand.ChatMessage:
+                        break;
+                    
+                    case SMClientCommand.RequestStartGame:
+                        string songTitle = (string)recievedPacket.Data["requestedSongTitle"];
+                        string songSubitle = (string)recievedPacket.Data["requestedSongSubtitle"];
+                        string songArtist = (string)recievedPacket.Data["requestedSongArtist"];
+                        CurrentRoom.StartGame(ServerRequestStartGame.BlindlyPlay, songTitle, songArtist, songSubitle);
+                        break;
 
-                        SMOPacket smoPacket = (SMOPacket)packet;
-                        // get the SMO Command (Seperate to a regular packet command)
-                        int smoCommand = smoPacket.SMOCommand;
-
-                        // decide what to do for each SMO command
-                        switch(smoCommand)
-                        {
-                            case (int)SMOClientCommand.Login:
-                                // Recieved if the user wants to login
-
-                                // NOTE: Password is recieved as either:
-                                //       1. MD5 Hash
-                                //       2. MD5(MD5 hash + salt) where the salt is a plaintext base10 string
-                                logger.Trace("Login attempt recieved -> {username}:{password}", smoPacket.Data["username"], smoPacket.Data["password"]);
-
-                                // create a response packet
-                                Dictionary<string, object> smoLoginData = new Dictionary<string, object>();
-                                Packet smoLoginPacket = new SMOServerLogin();
-
-                                // check if user exists in the database
-                                // if it does, attempt a login, if it doesn't, create an account with that password
-                                User existingUser = StepmaniaServer.dbContext.Users.Where(s => s.Username == (string)smoPacket.Data["username"]).SingleOrDefault();
-                                logger.Trace("User: {u}", existingUser);
-
-                                // if the username isnt taken, presume a registration attempt
-                                if (existingUser == null)
-                                {
-                                    logger.Trace("User does not exist so persuming that this is a new registration");
-                                    
-                                    // create a user
-                                    User newUser = new User()
-                                    {
-                                        Id = Guid.NewGuid().ToString(),
-                                        Username = (string)smoPacket.Data["username"],
-                                        SMPassword = (string)smoPacket.Data["password"]
-                                    };
-
-                                    // add it to database
-                                    StepmaniaServer.dbContext.Add<User>(newUser);
-
-                                    // apply changes
-                                    StepmaniaServer.dbContext.SaveChanges();
-
-                                    // set the response to a successful login
-                                    smoLoginData.Add("success", true);
-                                    smoLoginData.Add("loginResponse", "Successfully registered on the server");
-
-                                    user = StepmaniaServer.dbContext.Users.Where(s => s.Id == newUser.Id).SingleOrDefault();
-                                    logger.Info("User {username} has registered an account", newUser.Username);
-                                }
-                                // if the username exists in database, presume a login attempt
-                                else
-                                {
-                                    logger.Trace("User exists, attempting login");
-
-                                    if ((string)smoPacket.Data["password"] == existingUser.SMPassword)
-                                    {
-                                        // set the response to a successful login
-                                        smoLoginData.Add("success", true);
-                                        smoLoginData.Add("loginResponse", "Successfully logged into server");
-
-                                        user = existingUser;
-                                        logger.Info("User {username} has successfully logged in", existingUser.Username);
-                                    }
-                                    else
-                                    {
-                                        // set the response to a unsuccessful login
-                                        smoLoginData.Add("success", false);
-                                        smoLoginData.Add("loginResponse", "Error, Incorrect password");
-
-                                        logger.Warn("Incorrect login from user {username}", existingUser.Username);
-                                    }
-                                }
-
-
-                                // send the packet
-                                smoLoginPacket.Write(tcpWriter, smoLoginData);
-                                tcpWriter.Flush();
-                                break;
-                            
-                            case (int)SMOClientCommand.EnterRoom:
-                                if ((bool)smoPacket.Data["isEnter"])
-                                {
-                                    // get the room the client wants to enter from database
-                                    Room roomToEnter = StepmaniaServer.dbContext.Rooms.Where(s => s.Name == (string)smoPacket.Data["enterRoomName"]).SingleOrDefault();
-                                    
-                                    // catch blank password
-                                    string roomToEnterPassword = roomToEnter.Password;
-                                    if (roomToEnterPassword == null)
-                                    {
-                                        roomToEnterPassword = "";
-                                    }
-
-                                    // attempt authentication for room
-                                    if (roomToEnterPassword == (string)smoPacket.Data["enterRoomPassword"])
-                                    {
-                                        logger.Trace("Correct password for room entered, allow room entry");
-
-                                        // create a response packet
-                                        Dictionary<string, object> smoEnterRoom = new Dictionary<string, object>();
-                                        Packet smoEnterRoomPacket = new SMOServerRoomUpdate();
-
-                                        // add the data
-                                        smoEnterRoom.Add("update", "title");
-                                        smoEnterRoom.Add("roomTitle", roomToEnter.Name);
-                                        smoEnterRoom.Add("roomDescription", roomToEnter.Description);
-                                        smoEnterRoom.Add("isGame", true); // TODO: Support 'chat' rooms
-                                        smoEnterRoom.Add("allowSubroom", false);
-
-                                        // write the packet
-                                        smoEnterRoomPacket.Write(tcpWriter, smoEnterRoom);
-                                        tcpWriter.Flush();
-
-                                        // Add user to room
-                                        user.CurrentRoom = roomToEnter;
-                                        StepmaniaServer.dbContext.SaveChanges();
-                                    }
-                                    else
-                                    {
-                                        logger.Trace("Incorrect room password. Correct {correctPassword}, Entered: {enteredPassword}", roomToEnterPassword, smoPacket.Data["enterRoomPassword"]);
-                                    }
-                                }
-                                break;
-                            
-                            case (int)SMOClientCommand.CreateRoom:
-                                // create a room entity holding the information
-                                Room newRoom = new Room()
-                                {
-                                    Id = Guid.NewGuid().ToString(),
-                                    Name = (string)smoPacket.Data["newRoomName"],
-                                    Description = (string)smoPacket.Data["newRoomDescription"],
-                                    Password = (string)smoPacket.Data["newRoomPassword"],
-                                    Status = RoomStatus.Normal
-                                };
-
-                                // add to database and apply changes
-                                StepmaniaServer.dbContext.Add<Room>(newRoom);
-                                StepmaniaServer.dbContext.SaveChanges();
-
-                                // trigger an update for the client
-                                UpdateRoomList();
-                                break;
-                            
-                            case (int)SMOClientCommand.RoomInfo:
-                                // get the room that the information is requested about
-                                string roomName = (string)smoPacket.Data["roomName"];
-                                Room room = StepmaniaServer.dbContext.Rooms.Where(s => s.Name == roomName).SingleOrDefault();
-
-                                // if the room exists
-                                if (room != null)
-                                {
-                                    // create a response packet
-                                    Dictionary<string, object> smoRoomInfo = new Dictionary<string, object>();
-                                    Packet smoRoomInfoPacket = new SMOServerRoomInfo();
-
-                                    // get the players currently online
-                                    List<string> playerNames = new List<string>();
-                                    int numberPlayers = 0;
-                                    if (room.Users != null)
-                                    {
-                                        // if there are players online
-                                        numberPlayers = room.Users.Count;
-                                        foreach (User user in room.Users)
-                                        {
-                                            playerNames.Add(user.Username);
-                                        }
-                                    }
-
-                                    // if there is an active song/recent song
-                                    if (room.ActiveSong != null)
-                                    {
-                                        smoRoomInfo.Add("lastSongTitle", room.ActiveSong.Title);
-                                        smoRoomInfo.Add("lastSongSubtitle", room.ActiveSong.Subtitle);
-                                        smoRoomInfo.Add("lastSongArtist", room.ActiveSong.Artist);
-                                    }
-                                    else
-                                    {
-                                        // otherwise send back 'blank' data
-                                        smoRoomInfo.Add("lastSongTitle", "No Song Played");
-                                        smoRoomInfo.Add("lastSongSubtitle", "N/A");
-                                        smoRoomInfo.Add("lastSongArtist", "N/A");
-                                    }
-
-                                    smoRoomInfo.Add("numberPlayers", numberPlayers);
-                                    smoRoomInfo.Add("maxPlayers", room.MaxUsers);
-                                    smoRoomInfo.Add("playerNames", playerNames);
-
-                                    // write packet to client
-                                    smoRoomInfoPacket.Write(tcpWriter, smoRoomInfo);
-                                    tcpWriter.Flush();
-                                }
-                                break;
-                        }
+                    case SMClientCommand.ScreenChanged:
+                        CurrentScreen = (SMScreen)recievedPacket.Data["screenStatus"];
+                        HandleScreenChange();
+                        break;
+                    
+                    case SMClientCommand.PlayerOptions:
+                        break;
+                    
+                    case SMClientCommand.SMOnlinePacket:
+                        SMOPacket smoPacket = (SMOPacket)recievedPacket;
+                        HandleSMOPacket(smoPacket);
+                        break;
+                    
+                    case SMClientCommand.XMLPacket:
                         break;
                 }
             }
         }
 
-        // used to send the client an updated list of available rooms
-        private void UpdateRoomList()
+        // read the tcp stream and return the packet
+        private Packet ReadPacket()
         {
-            logger.Trace("Sending list of rooms");
+            // read the packet length and packet command from stream
+            int packetLength = PacketUtils.ReadLength(tcpReader);
+            byte packetCommand = PacketUtils.ReadByte(tcpReader);
+            logger.Trace("Recieved {packet} length {length}", (SMClientCommand)packetCommand, packetLength);
 
-            // get all the rooms fom from the db in a list
+            // get the packet recieved
+            Packet packetRecieved = PacketFactory.GetPacket(packetCommand);
+            packetRecieved.Length = packetLength;
+            packetRecieved.Command = packetCommand;
+
+            // parse the payload and return the packet
+            packetRecieved.Read(tcpReader);
+            return packetRecieved;
+        }
+
+        // decide what to do with the smo packet
+        private void HandleSMOPacket(SMOPacket packet)
+        {
+            switch((SMOClientCommand)packet.SMOCommand)
+            {
+                case SMOClientCommand.Login:
+                    LoginUser(packet);
+                    break;
+                
+                case SMOClientCommand.EnterRoom:
+                    bool isEnter = (bool)packet.Data["isEnter"];
+
+                    if (isEnter)
+                    {
+                        string roomName = (string)packet.Data["enterRoomName"];
+                        string roomPassword = (string)packet.Data["enterRoomPassword"];
+                        Room room = StepmaniaServer.dbContext.Rooms.Where(s => s.Name == roomName).SingleOrDefault();
+                        bool successfullyEntered = CurrentRoom.RoomManager.EnterRoom(room, roomPassword, this);
+
+                        if (successfullyEntered)
+                        {
+                            SendRoomEntered(roomName, room.Description);
+                        }
+                    }
+                    break;
+                
+                case SMOClientCommand.CreateRoom:
+                    string name = (string)packet.Data["newRoomName"];
+                    string description = (string)packet.Data["newRoomDescription"];
+                    string password = (string)packet.Data["newRoomPassword"];
+                    
+                    CurrentRoom.RoomManager.CreateRoom(name, description, password);
+                    SendRoomList();
+                    break;
+                
+                case SMOClientCommand.RoomInfo:
+                    break;
+            }
+        }
+
+        private void HandleScreenChange()
+        {
+            switch (CurrentScreen)
+            {
+                case SMScreen.EnteredScreenNetRoom:
+                    logger.Trace("Client entered room selection screen");
+                    SendRoomList();
+                    CurrentRoom.RoomManager.MoveToDummyRoom(this);
+                    break;
+            }
+        }
+
+        private void LoginUser(SMOPacket packet)
+        {
+            string username = (string)packet.Data["username"];
+            string password = (string)packet.Data["password"];
+
+            User existingUser = StepmaniaServer.dbContext.Users.Where(s => s.Username == username).SingleOrDefault();
+
+            if (existingUser == null)
+            {
+                // register new account
+                User newUser = new User()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Username = username,
+                    SMPassword = password
+                };
+
+                StepmaniaServer.dbContext.Add<User>(newUser);
+                StepmaniaServer.dbContext.SaveChanges();
+
+                // save user and send client a response
+                SetUser(username, newUser);
+                SendLoginResponse(true, "Successfully registered new account");
+            }
+            else
+            {
+                // attempt a login
+                if (password == existingUser.SMPassword)
+                {
+                    // successful login
+                    SetUser(username, existingUser);
+                    SendLoginResponse(true, "Successfully logged in");
+                }
+                else {
+                    // unsuccessful login
+                    SendLoginResponse(false, "Incorrect password");
+                }
+            }
+        }
+
+        private void SetUser(string username, User user)
+        {
+            if (username == Player1Name)
+            {
+                Player1 = user;
+                logger.Info("[Player 1] {username} successfully logged in", username);
+            }
+            else {
+                Player2 = user;
+                logger.Info("[Player 2] {username} successfully logged in", username);
+            }
+        }
+
+        // send a hello to the client
+        private void SendHello()
+        {
+            // create a packet and a dictionary to store packet data
+            Packet packet = new SMServerHello();
+            Dictionary<string, object> packetData = new Dictionary<string, object>();
+
+            // add data to packet to send
+            packetData.Add("serverProtocolVersion", GameServer.ProtocolVersion);
+            packetData.Add("serverName", GameServer.Name);
+            packetData.Add("randomKey", new byte[] { 0, 0, 0, 0 });
+
+            // send packet
+            packet.Write(tcpWriter, packetData);
+        }
+
+        // allows the game to start
+        public void SendAllowGameStart()
+        {
+            // create a packet
+            Packet packet = new SMServerAllowGameStart();
+
+            // send packet
+            packet.Write(tcpWriter, new Dictionary<string, object>());
+        }
+
+        // send requests start game
+        public void SendRequestStartGame(ServerRequestStartGame status, string title, string artist, string subtitle)
+        {
+            // create a packet and a dictionary to store packet data
+            Packet packet = new SMServerRequestStartGame();
+            Dictionary<string, object> packetData = new Dictionary<string, object>();
+
+            // add data to packet to send
+            packetData.Add("messageType", status);
+            packetData.Add("songTitle", title);
+            packetData.Add("songSubtitle", subtitle);
+            packetData.Add("songArtist", artist);
+
+            // send packet
+            packet.Write(tcpWriter, packetData);
+        }
+
+        // send login response
+        private void SendLoginResponse(bool isSuccess, string loginResponse)
+        {
+            // create a packet and a dictionary to store packet data
+            SMOPacket packet = new SMOServerLogin();
+            Dictionary<string, object> packetData = new Dictionary<string, object>();
+
+            // add data to packet to send
+            packetData.Add("isSuccess", isSuccess);
+            packetData.Add("loginResponse", loginResponse);
+
+            // send packet
+            packet.Write(tcpWriter, packetData);
+        }
+
+        // send list of rooms
+        private void SendRoomList()
+        {
             List<Room> rooms = StepmaniaServer.dbContext.Rooms.ToList();
-            List<Tuple<string, string, byte, byte>> formattedRooms = new List<Tuple<string, string, byte, byte>>();
+            List<Tuple<string, string>> formattedRooms = new List<Tuple<string, string>>();
 
             // pull all required data and place in a List of Tuples
             foreach (Room room in rooms)
             {
                 string roomName = room.Name;
                 string roomDescription = room.Description;
-                byte roomStatus = (byte)room.Status;
-                byte roomPasswordless = (room.Password == null) ? (byte)0x01 : (byte)0x00;
 
-                formattedRooms.Add(new Tuple<string, string, byte, byte>(roomName, roomDescription, roomStatus, roomPasswordless));
+                formattedRooms.Add(new Tuple<string, string>(roomName, roomDescription));
             }
 
-            // create a response packet
-            Dictionary<string, object> smoUpdateRoomList = new Dictionary<string, object>();
-            Packet smoUpdateRoomListPacket = new SMOServerRoomUpdate();
+            // create a packet and a dictionary to store packet data
+            SMOPacket packet = new SMOServerRoomUpdate();
+            Dictionary<string, object> packetData = new Dictionary<string, object>();
 
-            // add required info
-            smoUpdateRoomList.Add("update", "rooms");
-            smoUpdateRoomList.Add("numberRooms", formattedRooms.Count);
-            smoUpdateRoomList.Add("rooms", formattedRooms);
+            // add data to packet to send
+            packetData.Add("update", "rooms");
+            packetData.Add("numberRooms", formattedRooms.Count);
+            packetData.Add("rooms", formattedRooms);
 
-            // send packet to client
-            smoUpdateRoomListPacket.Write(tcpWriter, smoUpdateRoomList);
-            tcpWriter.Flush();
+            // send packet
+            packet.Write(tcpWriter, packetData);
         }
 
-        // used to check whether the client is still connected
-        public void SendPing()
+        // send room entered
+        private void SendRoomEntered(string name, string description)
         {
-            // reset update counter
-            updates = 0;
+            // create a packet and a dictionary to store packet data
+            SMOPacket packet = new SMOServerRoomUpdate();
+            Dictionary<string, object> packetData = new Dictionary<string, object>();
 
-            // create a ping packet and send it
-            Packet smoPingPacket = new SMServerPing();
-            smoPingPacket.Write(tcpWriter, new Dictionary<string, object>());
-            tcpWriter.Flush();
-        }
+            // add data to packet to send
+            packetData.Add("update", "title");
+            packetData.Add("roomTitle", name);
+            packetData.Add("roomDescription", description);
+            packetData.Add("isGame", true);
+            packetData.Add("allowSubroom", false);
 
-        public void ChangeStatus(UserStatus userStatus)
-        {
-            if (user != null)
-            {
-                logger.Trace("User {username} Status: {status}", user.Username, userStatus);
-                user.Online = userStatus != UserStatus.None;
-                user.Status = userStatus;
-                StepmaniaServer.dbContext.SaveChanges();
-            }
-        }
-
-        // called if the client disconnects for any reason
-        // basically a cleanup method
-        public void Disconnected()
-        {
-            if (user != null)
-            {
-                user.Online = false;
-                user.Status = UserStatus.None;
-                user.CurrentRoom = null;
-            }
-
-            StepmaniaServer.dbContext.SaveChanges();
+            //send packet
+            packet.Write(tcpWriter, packetData);
         }
     }
 }

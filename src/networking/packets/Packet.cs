@@ -89,6 +89,9 @@ namespace StepmaniaServer
                 case (int)SMClientCommand.Hello:
                     return new SMClientHello();
 
+                case (int)SMClientCommand.GameStartRequest:
+                    return new SMClientGameStartRequest();
+
                 case (int)SMClientCommand.StyleUpdate:
                     return new SMClientStyleUpdate();
 

@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 
 using NLog;
 
@@ -14,90 +11,46 @@ namespace StepmaniaServer
     class GameServer
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         private static Config config = new Config();
-        
-        private static TcpListener tcpListener;
-        private static List<GameClient> gameClients = new List<GameClient>();
+        private TcpListener tcpListener;
+        private GameRoomManager gameRoomManager;
 
-        private static Thread gameClientThread;
+        public static string Name = config.Get("/config/game-server/name", "A Stepmania Server");
+        public static int ProtocolVersion = Convert.ToInt32(config.Get("/config/game-server/protocol", "128"));
 
-        public static void Start()
+        // the game server is a class that holds the actual game server and handles
+        // accepting connections and passing them down through the server
+        public GameServer()
         {
-            logger.Info("Started game server thread");
-            // create the server
-            // and set the timeout options which are in config file
-            // then start the server
-            tcpListener = new TcpListener(IPAddress.Parse(config.Get("/config/game-server/ip", "0.0.0.0")), Convert.ToInt32(config.Get("/config/game-server/port", "8765")));
-            tcpListener.Server.ReceiveTimeout = Convert.ToInt32(config.Get("/config/game-server/timeout", "1000"));
-            tcpListener.Server.SendTimeout = Convert.ToInt32(config.Get("/config/game-server/timeout", "1000"));
+            // get the server config options
+            IPAddress serverIp = IPAddress.Parse(config.Get("/config/game-server/ip", "0.0.0.0"));
+            int serverPort = Convert.ToInt32(config.Get("/config/game-server/port", "8765"));
+            int serverTimeout = Convert.ToInt32(config.Get("/config/game-server/timeout", "1000"));
+
+            // start the tcp listener (the server)
+            tcpListener = new TcpListener(serverIp, serverPort);
+            tcpListener.Server.SendTimeout = serverTimeout;
+            tcpListener.Server.ReceiveTimeout = serverTimeout;
             tcpListener.Start();
-            
-            logger.Info("Game server starting on {ip}:{port}", IPAddress.Parse(config.Get("/config/game-server/ip", "0.0.0.0")), Convert.ToInt32(config.Get("/config/game-server/port", "8765")));
+            logger.Info("Starting the game server at {ip}:{port}", serverIp, serverPort);
 
-            // kickstart the thread which handles each of the connected game clients
-            gameClientThread = new Thread(GameClientThread);
-            gameClientThread.Name = "GameClientThread";
-            gameClientThread.Start();
+            // create game room manager
+            gameRoomManager = new GameRoomManager();
 
-            // start the main server loop
-            while (true)
-            {
-                // if a tcp request is recieved, assume its a client and accept it
-                TcpClient newTcpClient = tcpListener.AcceptTcpClient();
-
-                // get some basic info about the client
-                string clientInformation = newTcpClient.Client.RemoteEndPoint.ToString();
-                logger.Debug("Client {information} connected", clientInformation);
-
-                // TODO: Implement ban checking etc.
-
-                // add the client to the list of clients that the game thread will handle
-                GameClient newGameClient = new GameClient(newTcpClient);
-                gameClients.Add(newGameClient);
-            }
+            // start the server loop
+            ServerLoop();
         }
 
-        private static void GameClientThread()
+        // constantly listen for connections
+        private void ServerLoop()
         {
-            int fullTicks = 0;
-            // game client thread loop
-            while (true)
+            while(true)
             {
-                // loop through all clients and update them periodically
-                foreach (GameClient gameClient in gameClients.ToList())
-                {
-                    if (gameClient.updates >= 100)
-                    {
-                        gameClient.SendPing();
-                    }
-                    
-                    // only update if the client is still connected
-                    if (gameClient.tcpClient.Connected)
-                    {
-                        gameClient.Update();
-                    }
-                    // if the client is no longer connected, remove it from the list and stop updating it
-                    else
-                    {
-                        logger.Trace("Client is no longer connected, removing from update list");
-                        gameClient.Disconnected();
-                        gameClients.Remove(gameClient);
-                        logger.Debug("Client {information} disconnected", gameClient.clientInformation);
-                    }
-                }
+                // accept a TCP client if one connects to the server
+                TcpClient tcpClient = tcpListener.AcceptTcpClient();
 
-                // send message every 30 seconds (20 * 30 ticks)
-                fullTicks++;
-                if (fullTicks >= (20 * 30))
-                {
-                    logger.Info("There are currently {num} Client(s) connected", gameClients.Count);
-                    fullTicks = 0;
-                }
-
-                // NOTE: should probably calculate the time taken for the update and
-                //       subtract it from the sleep time.
-                Thread.Sleep(50); // update 20 times per second [20 tps]
+                // pass TCP client to the game room manager
+                gameRoomManager.AddClient(tcpClient);
             }
         }
     }

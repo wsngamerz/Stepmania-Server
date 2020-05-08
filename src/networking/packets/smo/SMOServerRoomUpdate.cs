@@ -75,15 +75,15 @@ namespace StepmaniaServer
                 // load information of all the rooms
                 updateType = 0x01;
                 int numberRooms = (int)data["numberRooms"];
-                List<Tuple<string, string, byte, byte>> rooms = (List<Tuple<string, string, byte, byte>>)data["rooms"];
+                List<Tuple<string, string>> rooms = (List<Tuple<string, string>>)data["rooms"];
 
                 // calculate packet length
                 int totalPacketLength = 4;
-                foreach (Tuple<string, string, byte, byte> room in rooms)
+                foreach (Tuple<string, string> room in rooms)
                 {
                     totalPacketLength += room.Item1.Length;
                     totalPacketLength += room.Item2.Length;
-                    totalPacketLength += 4;
+                    totalPacketLength += 2;
                 }
 
                 Length = totalPacketLength;
@@ -97,12 +97,10 @@ namespace StepmaniaServer
                 PacketUtils.WriteByte(packetStream, (byte)numberRooms);
 
                 // write info for each room
-                foreach (Tuple<string, string, byte, byte> room in rooms)
+                foreach (Tuple<string, string> room in rooms)
                 {
                     PacketUtils.WriteNTString(packetStream, room.Item1);
                     PacketUtils.WriteNTString(packetStream, room.Item2);
-                    PacketUtils.WriteByte(packetStream, room.Item3);
-                    PacketUtils.WriteByte(packetStream, room.Item4);
                 }
             }
 
@@ -112,6 +110,7 @@ namespace StepmaniaServer
             // send bytearray to client
             logger.Trace("Sending Room Update: {payload}", PacketUtils.ByteArrayToString(packetPayload));
             binaryWriter.Write(packetPayload);
+            binaryWriter.Flush();
         }
     }
 }

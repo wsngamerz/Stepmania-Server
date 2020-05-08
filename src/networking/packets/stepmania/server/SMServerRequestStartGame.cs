@@ -58,14 +58,15 @@ namespace StepmaniaServer
 
             // send the byte array
             binaryWriter.Write(packetPayload);
+            binaryWriter.Flush();
         }
     }
 
     public enum ServerRequestStartGame
     {
-        CHECK_CLIENT_HAS_SONG = 0,
-        CHECK_CLIENT_HAS_SONG_SCROLL = 1,
-        CHECK_CLIENT_HAS_SONG_SCROLL_PLAY = 2,
-        BLINDLY_PLAY = 3
+        CheckClientHasSong = 0,
+        CheckClientHasSongScroll = 1,
+        CheckClientHasSongScrollPlay = 2,
+        BlindlyPlay = 3
     }
 }

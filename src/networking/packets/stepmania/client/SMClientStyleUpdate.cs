@@ -13,9 +13,9 @@ namespace StepmaniaServer
         private int _command;
         private Dictionary<string, object> _data;
 
-        private int NumPlayers; // players on system
-        private int PlayerNum; // specified player
-        private string PlayerName; // player name
+        public int NumPlayers; // players on system
+        public string Player1Name;
+        public string Player2Name;
 
         public override int Length
         {
@@ -36,23 +36,33 @@ namespace StepmaniaServer
 
         public override void Read(BinaryReader binaryReader)
         {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+
             // number of enabled players (1 or 2) on the client
             NumPlayers = PacketUtils.ReadByte(binaryReader);
-
-            // the player number (0: P1 or 1: P2)
-            PlayerNum = PacketUtils.ReadByte(binaryReader);
-
-            // The player name for the specified player number
-            PlayerName = PacketUtils.ReadNTString(binaryReader);
-            
-            // store the data for packet recieved in the Data dictionary
-            Dictionary<string, object> data = new Dictionary<string, object>();
             data.Add("numPlayers", NumPlayers);
-            data.Add("playerNum", PlayerNum);
-            data.Add("playerName", PlayerName);
+            
+            for (int i = 0; i < NumPlayers; i++)
+            {
+                // the player number (0: P1 or 1: P2)
+                int playerNumber = PacketUtils.ReadByte(binaryReader);
+
+                // The player name for the specified player number
+                if (playerNumber == 0)
+                {
+                    Player1Name = PacketUtils.ReadNTString(binaryReader);
+                    data.Add("player1Name", Player1Name);
+                }
+                else
+                {
+                    Player2Name = PacketUtils.ReadNTString(binaryReader);
+                    data.Add("player2Name", Player2Name);
+                }
+            }
+
             Data = data;
 
-            logger.Trace("Recieved Style Update - Players: {players} ID: {playerID} Name: {playerName}", NumPlayers, PlayerNum, PlayerName);
+            logger.Trace("Recieved Style Update - Players: {players}, P1Name: {player1Name}, P2Name: {player2Name}", NumPlayers, Player1Name, Player2Name);
         }
 
         public override void Write(BinaryWriter binaryWriter, Dictionary<string, object> data) { }

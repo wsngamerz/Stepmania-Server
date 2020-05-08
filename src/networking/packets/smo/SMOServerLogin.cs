@@ -41,7 +41,7 @@ namespace StepmaniaServer
         public override void Write(BinaryWriter binaryWriter, Dictionary<string, object> data)
         {
             // approval status
-            bool isSuccess = (bool)data["success"];
+            bool isSuccess = (bool)data["isSuccess"];
 
             // login response (plaintext)
             string loginResponse = (string)data["loginResponse"];
@@ -64,6 +64,7 @@ namespace StepmaniaServer
 
             // send packet
             binaryWriter.Write(packetPayload);
+            binaryWriter.Flush();
         }
     }
 }

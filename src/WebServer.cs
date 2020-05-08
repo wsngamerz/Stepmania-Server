@@ -10,14 +10,14 @@ using NLog;
 
 namespace StepmaniaServer
 {
-    class WebsiteServer
+    class WebServer
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         
         private static Config config = new Config();
 
         // start the web server
-        public static void Start()
+        public WebServer()
         {
             // setup logging
             SetupLogging();
@@ -48,14 +48,14 @@ namespace StepmaniaServer
         }
 
         // creates and configures the webs server
-        private static WebServer CreateWebServer(string url)
+        private static EmbedIO.WebServer CreateWebServer(string url)
         {
             // the path to our web client
             string webServerFiles = Path.Combine(Directory.GetCurrentDirectory(), "Web");
             logger.Trace("Web server files: {location}", webServerFiles);
 
             // create the web server object
-            WebServer webServer = new WebServer(o => o
+            EmbedIO.WebServer webServer = new EmbedIO.WebServer(o => o
                 .WithUrlPrefix(url)
                 .WithMode(HttpListenerMode.EmbedIO)
             ).WithLocalSessionManager()
@@ -69,7 +69,7 @@ namespace StepmaniaServer
         private static async Task RunWebServerAsync(string url, CancellationToken cancellationToken)
         {
             logger.Trace("Starting Web Server");
-            WebServer server = CreateWebServer(url);
+            EmbedIO.WebServer server = CreateWebServer(url);
             await server.RunAsync(cancellationToken).ConfigureAwait(false);
         }
     }
