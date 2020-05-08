@@ -21,6 +21,12 @@ namespace StepmaniaServer
             memoryStream.Write(rawData);
         }
 
+        // reads an array of bytes
+        public static byte[] ReadBytes(BinaryReader binaryReader, int count)
+        {
+            return binaryReader.ReadBytes(count);
+        }
+
         // writes an array of bytes
         public static void WriteBytes(MemoryStream memoryStream, byte[] data) {
             memoryStream.Write(data);
