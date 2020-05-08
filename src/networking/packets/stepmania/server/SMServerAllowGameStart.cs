@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -5,8 +6,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // packet sent to the client by the server in response to a requesting of a game start
-    class SMServerRequestStartGame : Packet
+    // packet sent to the client by the server to check whether
+    // the client is still connected properly
+    class SMServerAllowGameStart : Packet
     {
         private int _length;
         private int _command;
@@ -20,7 +22,7 @@ namespace StepmaniaServer
 
         public override int Command
         {
-            get { return (int)SMServerCommand.RequestStartGame; }
+            get { return (int)SMServerCommand.AllowGameStart; }
             set { _command = value; }
         }
 
@@ -33,40 +35,21 @@ namespace StepmaniaServer
 
         public override void Write(BinaryWriter binaryWriter, Dictionary<string, object> data)
         {
-            ServerRequestStartGame messageType = (ServerRequestStartGame)data["messageType"];
-            string songTitle = (string)data["songTitle"];
-            string songArtist = (string)data["songArtist"];
-            string songSubtitle = (string)data["songSubtitle"];
-
             // calculate the length of the packet
-            Length = 5 + songTitle.Length + songArtist.Length + songSubtitle.Length;
+            Length = 1;
 
             // create a memorystream to hold the packet to send
             MemoryStream packetStream = new MemoryStream(Length + 4);
-
-            // write data to the memory stream
             PacketUtils.WriteLength(packetStream, Length);
             PacketUtils.WriteByte(packetStream, (byte)Command);
-            PacketUtils.WriteByte(packetStream, (byte)messageType);
-            PacketUtils.WriteNTString(packetStream, songTitle);
-            PacketUtils.WriteNTString(packetStream, songArtist);
-            PacketUtils.WriteNTString(packetStream, songSubtitle);
 
             // convert MemoryStream to byte array
             byte[] packetPayload = packetStream.GetBuffer();
-            logger.Trace("Packet {command} sending {payload}", Command, PacketUtils.ByteArrayToString(packetPayload));
+            logger.Trace("Sending allow game start");
 
             // send the byte array
             binaryWriter.Write(packetPayload);
             binaryWriter.Flush();
         }
-    }
-
-    public enum ServerRequestStartGame
-    {
-        CheckClientHasSong = 0,
-        CheckClientHasSongScroll = 1,
-        CheckClientHasSongScrollPlay = 2,
-        BlindlyPlay = 3
     }
 }

@@ -57,8 +57,8 @@ namespace StepmaniaServer
 
     public enum ClientRequestStartGameStatus
     {
-        USER_HAS_SONG = 0,
-        USER_DOESNT_HAVE_SONG = 1,
-        REQUESTED_START = 2
+        UserHasSong = 0,
+        UserDoesntHaveSong = 1,
+        RequestStart = 2
     }
 }

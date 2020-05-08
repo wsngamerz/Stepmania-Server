@@ -51,6 +51,13 @@ namespace StepmaniaServer
                 // decide what to do with each packet command
                 switch((SMClientCommand)recievedPacket.Command)
                 {
+                    case SMClientCommand.Ping:
+                        break;
+
+                    case SMClientCommand.PingR:
+                        logger.Trace("Recieved a ping response");
+                        break;
+
                     case SMClientCommand.Hello:
                         ClientBuild = (string)recievedPacket.Data["clientBuild"];
                         ClientProtocolVersion = (int)recievedPacket.Data["clientProtocolVersion"];
@@ -58,6 +65,16 @@ namespace StepmaniaServer
                         logger.Trace("Connection request from client {clientInfo} build {build} protocol {protocol}", tcpClient.Client.RemoteEndPoint.ToString(), ClientBuild, ClientProtocolVersion);
 
                         SendHello();
+                        break;
+                    
+                    case SMClientCommand.GameStartRequest:
+                        CurrentRoom.ClientReady();
+                        break;
+                    
+                    case SMClientCommand.GameOverNotice:
+                        break;
+                    
+                    case SMClientCommand.GameStatusUpdate:
                         break;
                     
                     case SMClientCommand.StyleUpdate:
@@ -72,15 +89,31 @@ namespace StepmaniaServer
                         Player1Name = (string)player1Name;
                         Player2Name = (string)player2Name;
                         break;
+                    
+                    case SMClientCommand.ChatMessage:
+                        break;
+                    
+                    case SMClientCommand.RequestStartGame:
+                        string songTitle = (string)recievedPacket.Data["requestedSongTitle"];
+                        string songSubitle = (string)recievedPacket.Data["requestedSongSubtitle"];
+                        string songArtist = (string)recievedPacket.Data["requestedSongArtist"];
+                        CurrentRoom.StartGame(ServerRequestStartGame.BlindlyPlay, songTitle, songArtist, songSubitle);
+                        break;
 
                     case SMClientCommand.ScreenChanged:
                         CurrentScreen = (SMScreen)recievedPacket.Data["screenStatus"];
                         HandleScreenChange();
                         break;
                     
+                    case SMClientCommand.PlayerOptions:
+                        break;
+                    
                     case SMClientCommand.SMOnlinePacket:
                         SMOPacket smoPacket = (SMOPacket)recievedPacket;
                         HandleSMOPacket(smoPacket);
+                        break;
+                    
+                    case SMClientCommand.XMLPacket:
                         break;
                 }
             }
@@ -220,6 +253,33 @@ namespace StepmaniaServer
             packetData.Add("serverProtocolVersion", GameServer.ProtocolVersion);
             packetData.Add("serverName", GameServer.Name);
             packetData.Add("randomKey", new byte[] { 0, 0, 0, 0 });
+
+            // send packet
+            packet.Write(tcpWriter, packetData);
+        }
+
+        // allows the game to start
+        public void SendAllowGameStart()
+        {
+            // create a packet
+            Packet packet = new SMServerAllowGameStart();
+
+            // send packet
+            packet.Write(tcpWriter, new Dictionary<string, object>());
+        }
+
+        // send requests start game
+        public void SendRequestStartGame(ServerRequestStartGame status, string title, string artist, string subtitle)
+        {
+            // create a packet and a dictionary to store packet data
+            Packet packet = new SMServerRequestStartGame();
+            Dictionary<string, object> packetData = new Dictionary<string, object>();
+
+            // add data to packet to send
+            packetData.Add("messageType", status);
+            packetData.Add("songTitle", title);
+            packetData.Add("songSubtitle", subtitle);
+            packetData.Add("songArtist", artist);
 
             // send packet
             packet.Write(tcpWriter, packetData);
