@@ -1,5 +1,4 @@
-import React from 'react';
-import Loadable from 'react-loadable';
+import React, { Suspense, lazy } from 'react';
 import { Layout, Menu } from 'antd';
 import { Router, Link, Location } from '@reach/router';
 
@@ -9,31 +8,11 @@ import Loading from './components/Loading';
 
 const { Header } = Layout;
 const { SubMenu } = Menu;
-const loadingDelay = 500;
 
-const LoadableHome = Loadable({
-    loader: () => import("./pages/Home"),
-    loading: Loading,
-    delay: loadingDelay
-});
-
-const LoadableLeaderboardSongs = Loadable({
-    loader: () => import("./pages/LeaderboardSongs"),
-    loading: Loading,
-    delay: loadingDelay
-});
-
-const LoadableLeaderboardUsers = Loadable({
-    loader: () => import("./pages/LeaderboardUsers"),
-    loading: Loading,
-    delay: loadingDelay
-});
-
-const LoadableListRooms = Loadable({
-    loader: () => import("./pages/ListRooms"),
-    loading: Loading,
-    delay: loadingDelay
-});
+const Home = lazy(() => import('./pages/Home'));
+const LeaderboardSongs = lazy(() => import('./pages/LeaderboardSongs'));
+const LeaderboardUsers = lazy(() => import('./pages/LeaderboardUsers'));
+const ListRooms = lazy(() => import('./pages/ListRooms'));
 
 const App = () => (
     <Layout className="app">
@@ -64,12 +43,14 @@ const App = () => (
                 }}
             </Location>
         </Header>
-        <Router>
-            <LoadableHome path="/" />
-            <LoadableLeaderboardSongs path="/leaderboards/songs" />
-            <LoadableLeaderboardUsers path="/leaderboards/users" />
-            <LoadableListRooms path="/rooms" />
-        </Router>
+        <Suspense fallback={<Loading />}>
+            <Router>
+                <Home path="/" />
+                <LeaderboardSongs path="/leaderboards/songs" />
+                <LeaderboardUsers path="/leaderboards/users" />
+                <ListRooms path="/rooms" />
+            </Router>
+        </Suspense>
     </Layout>
 );
 

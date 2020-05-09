@@ -1,4 +1,5 @@
 ![.NET Core](https://github.com/wsngamerz/Stepmania-Server/workflows/.NET%20Core/badge.svg)
+![Node.js CI](https://github.com/wsngamerz/Stepmania-Server/workflows/Node.js%20CI/badge.svg)
 ![GitHub repo size](https://img.shields.io/github/repo-size/wsngamerz/Stepmania-Server)
 
 # Stepmania Server: A Stepmania Server

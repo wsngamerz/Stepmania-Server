@@ -1,9 +1,12 @@
 import React from 'react';
+import { Spin } from 'antd';
 
 
 
 const Loading = () => (
-    <div>Loading</div>
+    <div className="loading">
+        <Spin tip="Loading ..." size="large" />
+    </div>
 );
 
 export default Loading;
