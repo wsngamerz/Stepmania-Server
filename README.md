@@ -3,7 +3,11 @@
 
 # Stepmania Server: A Stepmania Server
 
+[Stepmania](https://github.com/stepmania/stepmania)
+
 The plan for this project is to have a fully functioning stepmania server with an intergrated web client which can display live games and statistics to all players and all songs played.
+
+[Stepmania Server Web Client](https://github.com/wsngamerz/Stepmania-Server-Web)
 
 The server at the moment aims to be compatible with all official builds of stepmania.
 
@@ -27,6 +31,8 @@ Note: if you have previously installed the Dotnet Core SDK, the Dotnet Core Runt
 
 ## Building
 
+My main development PC runs Windows so I will primarily focus on that but Dotnet Core supports Linux and MacOS as well so if you have the technical knowhow, you should be able to build on those platforms too as nothing in the server depends on any platform specific API's.
+
 ### Windows
 
 Requirements:
@@ -44,3 +50,13 @@ git clone https://github.com/wsngamerz/Stepmania-Server
 cd Stepmania-Server
 .\build.bat
 ```
+
+NOTE: This currently builds x64, I will expand this to build a x86 version at a later date.
+
+### Linux
+
+Coming soon
+
+### MacOS
+
+Coming soon (but will be unable to test this as I do not own any MacOs devices)
