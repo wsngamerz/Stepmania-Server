@@ -79,7 +79,7 @@ namespace StepmaniaServer
                     writer.WriteStartElement("web-server");
                     
                     writer.WriteComment("enabled: [true/false] - whether to enable the embedded web server or not");
-                    writer.WriteElementString("enabled", "false");
+                    writer.WriteElementString("enabled", "true");
                     
                     writer.WriteComment("ip: the ip to host the web server on");
                     writer.WriteElementString("ip", "localhost");

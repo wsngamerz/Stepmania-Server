@@ -1,7 +1,10 @@
 obj/
 bin/
+build/
+dist/
 
 Data/
 Logs/
 config.xml
 database.db
+*.exe
