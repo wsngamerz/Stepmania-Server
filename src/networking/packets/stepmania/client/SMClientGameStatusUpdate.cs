@@ -66,7 +66,7 @@ namespace StepmaniaServer
             Dictionary<string, object> data = new Dictionary<string, object>();
             data.Add("playerNumber", PlayerNumber);
             data.Add("stepId", StepId);
-            data.Add("projectedGrade", ProjectedGrade);
+            data.Add("projectedGrade", (Grade) ProjectedGrade);
             data.Add("score", Score);
             data.Add("combo", Combo);
             data.Add("health", Health);

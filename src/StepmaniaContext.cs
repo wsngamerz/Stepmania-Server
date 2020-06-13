@@ -20,6 +20,7 @@ namespace StepmaniaServer
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Song> Songs { get; set; }
         public DbSet<SongStatistic> SongStatistics { get; set; }
+        public DbSet<SongUpdate> SongUpdates { get; set; }
         public DbSet<User> Users { get; set; }
 
 
@@ -96,6 +97,13 @@ namespace StepmaniaServer
                 entity.HasOne(d => d.Game).WithMany(p => p.SongStatistics);
                 entity.HasOne(d => d.Song).WithMany(p => p.SongStatistics);
                 entity.HasOne(d => d.User).WithMany(p => p.SongStatistics);
+                entity.HasMany(d => d.Updates).WithOne(p => p.SongStatistic);
+            });
+
+            // SongUpdates
+            modelBuilder.Entity<SongUpdate>(entity => 
+            {
+                entity.HasKey(e => e.Id);
             });
 
             // Users

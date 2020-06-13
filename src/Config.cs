@@ -18,6 +18,23 @@ namespace StepmaniaServer
         // the config file contents
         XmlDocument document;
 
+        // ensure only 1 config class is ever created accross threads
+        // 'Singleton Class - should be thread safe?'
+        public static Config Instance
+        {
+            get
+            {
+                lock (padlock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new Config();
+                    }
+                    return instance;
+                }
+            }
+        }
+
         public Config()
         {
             if(!File.Exists("Data/config.xml"))
@@ -130,23 +147,6 @@ namespace StepmaniaServer
             // load the xml file contents into the class
             document = new XmlDocument();
             document.Load("Data/config.xml");
-        }
-
-        // ensure only 1 config class is ever created accross threads
-        // 'Singleton Class - should be thread safe?'
-        public static Config Instance
-        {
-            get
-            {
-                lock (padlock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new Config();
-                    }
-                    return instance;
-                }
-            }
         }
 
         public string Get(string path, string fallback = "")

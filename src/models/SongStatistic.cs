@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
 
 
 
 namespace StepmaniaServer
 {
-    public enum SongStatisticGrade
+    public enum Grade
     {
         AAAA = 0,
         AAA = 1,
@@ -16,7 +17,7 @@ namespace StepmaniaServer
         F = 7
     }
 
-    public enum SongStatisticDifficulty
+    public enum Difficulty
     {
         Beginner = 0,
         Easy = 1,
@@ -36,21 +37,23 @@ namespace StepmaniaServer
         public int HitMine { get; set; }
         public int AvoidMine { get; set; }
         public int Miss { get; set; }
-        public int Bad { get; set; }
-        public int Good { get; set; }
-        public int Great { get; set; }
-        public int Perfect { get; set; }
-        public int Flawless { get; set; }
-        public int NotHeld { get; set; }
+        public int W5 { get; set; }
+        public int W4 { get; set; }
+        public int W3 { get; set; }
+        public int W2 { get; set; }
+        public int W1 { get; set; }
+        public int LetGo { get; set; }
         public int Held { get; set; }
 
         public int MaxCombo { get; set; }
         public string Options { get; set; }
         public int Score { get; set; }
-        public SongStatisticGrade Grade { get; set; }
-        public SongStatisticDifficulty Difficulty { get; set; }
+        public Grade Grade { get; set; }
+        public Difficulty Difficulty { get; set; }
         public int Percentage { get; set; }
         public int Duration { get; set; }
+
+        public virtual ICollection<SongUpdate> Updates { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
