@@ -5,7 +5,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // packet for the servers login response
+    /// <summary>
+    /// packet for the servers login response
+    /// </summary>
     class SMOServerLogin : SMOPacket
     {
         private int _length;

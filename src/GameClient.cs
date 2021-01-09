@@ -10,6 +10,9 @@ using NLog;
 
 namespace StepmaniaServer
 {
+    /// <summary>
+    /// Holds methods and functions relating to the game client
+    /// </summary>
     class GameClient
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -31,7 +34,10 @@ namespace StepmaniaServer
         public string Player1Name;
         public string Player2Name;
 
-        // the game client is a representation of a connection to the server
+        /// <summary>
+        /// the game client is a representation of a connection to the server
+        /// </summary>
+        /// <param name="clientConnection"></param>
         public GameClient(TcpClient clientConnection)
         {
             tcpClient = clientConnection;
@@ -40,7 +46,9 @@ namespace StepmaniaServer
             tcpWriter = new BinaryWriter(tcpStream);
         }
 
-        // check for new packets sent by the client
+        /// <summary>
+        /// check for new packets sent by the client
+        /// </summary>
         public void Update()
         {
             if (tcpClient.Available > 0)
@@ -119,7 +127,10 @@ namespace StepmaniaServer
             }
         }
 
-        // read the tcp stream and return the packet
+        /// <summary>
+        /// read the tcp stream and return the packet
+        /// </summary>
+        /// <returns>Packet</returns>
         private Packet ReadPacket()
         {
             // read the packet length and packet command from stream
@@ -137,7 +148,10 @@ namespace StepmaniaServer
             return packetRecieved;
         }
 
-        // decide what to do with the smo packet
+        /// <summary>
+        /// decide what to do with the smo packet
+        /// </summary>
+        /// <param name="packet">SMOPacket</param>
         private void HandleSMOPacket(SMOPacket packet)
         {
             switch((SMOClientCommand)packet.SMOCommand)
@@ -177,6 +191,9 @@ namespace StepmaniaServer
             }
         }
 
+        /// <summary>
+        /// Internal changes that need to happen as a result of a screen change
+        /// </summary>
         private void HandleScreenChange()
         {
             switch (CurrentScreen)
@@ -189,6 +206,10 @@ namespace StepmaniaServer
             }
         }
 
+        /// <summary>
+        /// Handle logins and authentication
+        /// </summary>
+        /// <param name="packet">Login SMO Packet</param>
         private void LoginUser(SMOPacket packet)
         {
             string username = (string)packet.Data["username"];
@@ -229,6 +250,11 @@ namespace StepmaniaServer
             }
         }
 
+        /// <summary>
+        /// Distinguish player1 and player2 internally
+        /// </summary>
+        /// <param name="username">username sent by client</param>
+        /// <param name="user">user in database</param>
         private void SetUser(string username, User user)
         {
             if (username == Player1Name)
@@ -242,7 +268,9 @@ namespace StepmaniaServer
             }
         }
 
-        // send a hello to the client
+        /// <summary>
+        /// send a hello to the client
+        /// </summary>
         private void SendHello()
         {
             // create a packet and a dictionary to store packet data
@@ -258,7 +286,9 @@ namespace StepmaniaServer
             packet.Write(tcpWriter, packetData);
         }
 
-        // allows the game to start
+        /// <summary>
+        /// allows the game to start
+        /// </summary>
         public void SendAllowGameStart()
         {
             // create a packet
@@ -268,7 +298,13 @@ namespace StepmaniaServer
             packet.Write(tcpWriter, new Dictionary<string, object>());
         }
 
-        // send requests start game
+        /// <summary>
+        /// send requests start game
+        /// </summary>
+        /// <param name="status">game status</param>
+        /// <param name="title">the song's title</param>
+        /// <param name="artist">the song's artist</param>
+        /// <param name="subtitle">the song's subtitle</param>
         public void SendRequestStartGame(ServerRequestStartGame status, string title, string artist, string subtitle)
         {
             // create a packet and a dictionary to store packet data
@@ -285,7 +321,11 @@ namespace StepmaniaServer
             packet.Write(tcpWriter, packetData);
         }
 
-        // send login response
+        /// <summary>
+        /// send login response
+        /// </summary>
+        /// <param name="isSuccess">whether the login was a success</param>
+        /// <param name="loginResponse">a message to send alongside the status</param>
         private void SendLoginResponse(bool isSuccess, string loginResponse)
         {
             // create a packet and a dictionary to store packet data
@@ -300,7 +340,9 @@ namespace StepmaniaServer
             packet.Write(tcpWriter, packetData);
         }
 
-        // send list of rooms
+        /// <summary>
+        /// send list of rooms
+        /// </summary>
         private void SendRoomList()
         {
             List<Room> rooms = StepmaniaServer.dbContext.Rooms.ToList();
@@ -328,7 +370,11 @@ namespace StepmaniaServer
             packet.Write(tcpWriter, packetData);
         }
 
-        // send room entered
+        /// <summary>
+        /// send room entered
+        /// </summary>
+        /// <param name="name">name of the room</param>
+        /// <param name="description">room description</param>
         private void SendRoomEntered(string name, string description)
         {
             // create a packet and a dictionary to store packet data

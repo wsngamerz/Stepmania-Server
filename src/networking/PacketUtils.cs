@@ -5,23 +5,38 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // a magic class which is super helpful for writing and parsing packets
+    /// <summary>
+    /// a util class which is super helpful for writing and parsing packets
+    /// </summary>
     class PacketUtils
     {
-        // reads a single byte
+        /// <summary>
+        /// reads a single byte
+        /// </summary>
+        /// <param name="binaryReader"></param>
+        /// <returns></returns>
         public static byte ReadByte(BinaryReader binaryReader)
         {
             return binaryReader.ReadByte();
         }
 
-        // writes a single byte
+        /// <summary>
+        /// writes a single byte
+        /// </summary>
+        /// <param name="memoryStream"></param>
+        /// <param name="data"></param>
         public static void WriteByte(MemoryStream memoryStream, byte data)
         {
             byte[] rawData = new byte[] { data };
             memoryStream.Write(rawData);
         }
 
-        // reads an array of bytes
+        /// <summary>
+        /// reads an array of bytes
+        /// </summary>
+        /// <param name="binaryReader"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
         public static byte[] ReadBytes(BinaryReader binaryReader, int count)
         {
             return binaryReader.ReadBytes(count);
@@ -32,9 +47,12 @@ namespace StepmaniaServer
             memoryStream.Write(data);
         }
         
-        // reads the length section of a packet
-        // first 4 bytes of a packet in LittleEndian format
-        // which means that the bytes are flipped
+        /// <summary>
+        /// reads the length section of a packet first 4 bytes of a packet in LittleEndian format which means that the
+        /// bytes are flipped
+        /// </summary>
+        /// <param name="binaryReader"></param>
+        /// <returns></returns>
         public static int ReadLength(BinaryReader binaryReader)
         {
             byte[] rawLength = binaryReader.ReadBytes(4);
@@ -43,8 +61,11 @@ namespace StepmaniaServer
             return Convert.ToInt32(BitConverter.ToUInt32(rawLength));
         }
 
-        // writes the 4 byte length of a packet and correctly flips
-        // for little endian format
+        /// <summary>
+        /// writes the 4 byte length of a packet and correctly flips for little endian format
+        /// </summary>
+        /// <param name="memoryStream"></param>
+        /// <param name="data"></param>
         public static void WriteLength(MemoryStream memoryStream, int data)
         {
             byte[] rawLength = BitConverter.GetBytes(Convert.ToUInt32(data));
@@ -53,7 +74,11 @@ namespace StepmaniaServer
             memoryStream.Write(rawLength);
         }
 
-        // reads a null terminated string
+        /// <summary>
+        /// reads a null terminated string
+        /// </summary>
+        /// <param name="binaryReader"></param>
+        /// <returns></returns>
         public static string ReadNTString(BinaryReader binaryReader)
         {
             string ntString = "";
@@ -71,7 +96,11 @@ namespace StepmaniaServer
             return ntString;
         }
 
-        // writes a null terminated string
+        /// <summary>
+        /// writes a null terminated string
+        /// </summary>
+        /// <param name="memoryStream"></param>
+        /// <param name="data"></param>
         public static void WriteNTString(MemoryStream memoryStream, string data)
         {
             byte[] rawString = new byte[data.Length + 1];
@@ -85,8 +114,11 @@ namespace StepmaniaServer
             memoryStream.Write(rawString);
         }
 
-        // utility function to convert an array of bytes into a human readable
-        // hexadecimal string
+        /// <summary>
+        /// utility function to convert an array of bytes into a human readable hexadecimal string
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static string ByteArrayToString(byte[] data) {
             return BitConverter.ToString(data).Replace("-", " ");
         }

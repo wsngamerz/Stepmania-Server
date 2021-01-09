@@ -5,8 +5,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // packet sent to the client by the server in response to the client's
-    // hello packet to introduce the server to the client.
+    /// <summary>
+    /// packet sent to the client by the server in response to the client's hello packet to introduce the server to the client.
+    /// </summary>
     class SMServerHello : Packet
     {
         private int _length;

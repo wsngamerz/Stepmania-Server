@@ -7,7 +7,9 @@ using NLog;
 
 namespace StepmaniaServer
 {
-    // Stepmania Server's Database Context
+    /// <summary>
+    /// Stepmania Server's Database Context
+    /// </summary>
     public class StepmaniaContext : DbContext
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -24,7 +26,10 @@ namespace StepmaniaServer
         public DbSet<User> Users { get; set; }
 
 
-        // conigure the provider
+        /// <summary>
+        /// conigure the provider
+        /// </summary>
+        /// <param name="optionsBuilder"></param>
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // get the selected provider from the config
@@ -55,8 +60,10 @@ namespace StepmaniaServer
             }
         }
 
-        // Apply more information to the models such as setting their
-        // Primary keys and relations between models
+        /// <summary>
+        /// Apply more information to the models such as setting their Primary keys and relations between models
+        /// </summary>
+        /// <param name="modelBuilder"></param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

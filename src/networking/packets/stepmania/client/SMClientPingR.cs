@@ -5,7 +5,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // Sent in response to the server sending a ping to the client
+    /// <summary>
+    /// Sent in response to the server sending a ping to the client
+    /// </summary>
     class SMClientPingR : Packet
     {
         private int _length;

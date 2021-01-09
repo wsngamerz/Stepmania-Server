@@ -6,8 +6,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // packet sent to the client by the server to check whether
-    // the client is still connected properly
+    /// <summary>
+    /// packet sent to the client by the server to check whether the client is still connected properly
+    /// </summary>
     class SMServerAllowGameStart : Packet
     {
         private int _length;

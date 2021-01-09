@@ -18,6 +18,10 @@ namespace StepmaniaServer
         public static StepmaniaContext dbContext;
         public static bool isRunning = true;
 
+        /// <summary>
+        /// Entry point into the application
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
             SetupLogging();
@@ -52,6 +56,9 @@ namespace StepmaniaServer
             LogManager.Shutdown();
         }
 
+        /// <summary>
+        /// Sets up application wide logging
+        /// </summary>
         private static void SetupLogging()
         {
             // setup the configuration for logging
@@ -111,6 +118,9 @@ namespace StepmaniaServer
             logger.Trace("Setting up logging");
         }
 
+        /// <summary>
+        /// Sets up the database
+        /// </summary>
         private static void SetupDatabases()
         {
             logger.Trace("Setting up databases");

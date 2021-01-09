@@ -5,8 +5,10 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    //!IMPORTANT! This command is unrelated to Server Command 0x06 (006). !IMPORTANT!
-    // This is sent when a style is chosen.
+    /// <summary>
+    /// This is sent when a style is chosen.
+    /// !IMPORTANT! This command is unrelated to Server Command 0x06 (006). !IMPORTANT! 
+    /// </summary>
     class SMClientStyleUpdate : Packet
     {
         private int _length;

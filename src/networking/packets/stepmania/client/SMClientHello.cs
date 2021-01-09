@@ -5,7 +5,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // The first packet sent to the server by the client
+    /// <summary>
+    /// The first packet sent to the server by the client
+    /// </summary>
     class SMClientHello : Packet
     {
         private int _length;

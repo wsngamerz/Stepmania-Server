@@ -18,8 +18,9 @@ namespace StepmaniaServer
         public static string Name = config.Get("/config/game-server/name", "A Stepmania Server");
         public static int ProtocolVersion = Convert.ToInt32(config.Get("/config/game-server/protocol", "128"));
 
-        // the game server is a class that holds the actual game server and handles
-        // accepting connections and passing them down through the server
+        /// <summary>
+        /// the game server is a class that holds the actual game server and handles accepting connections and passing them down through the server
+        /// </summary>
         public GameServer()
         {
             // get the server config options
@@ -41,7 +42,9 @@ namespace StepmaniaServer
             ServerLoop();
         }
 
-        // constantly listen for connections
+        /// <summary>
+        /// constantly listen for connections
+        /// </summary>
         private void ServerLoop()
         {
             while(true)

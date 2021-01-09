@@ -7,7 +7,9 @@ using NLog;
 
 namespace StepmaniaServer
 {
-    // abstract class to represent a packet
+    /// <summary>
+    /// abstract class to represent a packet
+    /// </summary>
     abstract class Packet
     {
         // Logger
@@ -27,17 +29,19 @@ namespace StepmaniaServer
         public abstract void Write(BinaryWriter binaryWriter, Dictionary<string, object> data);
     }
 
-    // abstract class that represents a SMO packet which has a bit more information than
-    // a regular packet
+    /// <summary>
+    /// abstract class that represents a SMO packet which has a bit more information than a regular packet
+    /// </summary>
     abstract class SMOPacket : Packet
     {
         // SMO Command is another byte using the SMO 'Sub-Protocol'
         public abstract int SMOCommand { get; set; }
     }
 
-    // Unknown packet is used if a packet has yet to be implemented
-    // so it reads all the packet information inclding tne length, command
-    // and the payload and outputs it in the log for development
+    /// <summary>
+    /// Unknown packet is used if a packet has yet to be implemented so it reads all the packet information inclding
+    /// the length, command and the payload and outputs it in the log for development
+    /// </summary>
     class UnknownPacket : Packet
     {
         private int _length;
@@ -76,9 +80,16 @@ namespace StepmaniaServer
     }
 
 
-    // used to return the correct class based upon the packet command
+    /// <summary>
+    /// used to return the correct class based upon the packet command
+    /// </summary>
     class PacketFactory
     {
+        /// <summary>
+        /// return the backed based upon the packet command
+        /// </summary>
+        /// <param name="command">packet command</param>
+        /// <returns>packet relating to the command</returns>
         public static Packet GetPacket(int command)
         {
             switch (command)

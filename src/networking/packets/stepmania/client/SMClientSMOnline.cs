@@ -5,7 +5,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // The SMOnline Packet is a wrapper of sorts for the SMOnline protocol
+    /// <summary>
+    /// The SMOnline Packet is a wrapper of sorts for the SMOnline protocol
+    /// </summary>
     class SMClientSMOnline : SMOPacket
     {
         private int _length;

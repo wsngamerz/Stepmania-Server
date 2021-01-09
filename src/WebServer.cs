@@ -16,7 +16,9 @@ namespace StepmaniaServer
         
         private static Config config = new Config();
 
-        // start the web server
+        /// <summary>
+        /// Starts the internal web server
+        /// </summary>
         public WebServer()
         {
             // setup logging
@@ -39,6 +41,9 @@ namespace StepmaniaServer
             logger.Trace("WebServer stopped");
         }
 
+        /// <summary>
+        /// customises the EmbedIO's internal logger to use NLog
+        /// </summary>
         private static void SetupLogging()
         {
             // unregister the default logger and register our own
@@ -47,7 +52,11 @@ namespace StepmaniaServer
             Swan.Logging.Logger.RegisterLogger<WebServerLogger>();
         }
 
-        // creates and configures the webs server
+        /// <summary>
+        /// creates and configures the webs server
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         private static EmbedIO.WebServer CreateWebServer(string url)
         {
             // the path to our web client
@@ -74,8 +83,10 @@ namespace StepmaniaServer
         }
     }
 
-    // the custom logger which wraps the NLog logging system in the Swan logging format
-    // so that the application only technically outputs 1 logging format
+    /// <summary>
+    /// the custom logger which wraps the NLog logging system in the Swan logging format so that the application only
+    /// technically outputs 1 logging format
+    /// </summary>
     public class WebServerLogger : Swan.Logging.ILogger
     {
         // NLog
@@ -84,7 +95,10 @@ namespace StepmaniaServer
         // only use a LogLevel of Info as EmbedIO outputs way too much Debug information
         public Swan.Logging.LogLevel LogLevel { get; set; } = Swan.Logging.LogLevel.Info;
 
-        // forwards all logging attempts to NLogs logging functions
+        /// <summary>
+        /// forwards all logging attempts to NLogs logging functions
+        /// </summary>
+        /// <param name="logEvent"></param>
         public void Log(Swan.Logging.LogMessageReceivedEventArgs logEvent)
         {
             string message = logEvent.Message;
@@ -117,7 +131,9 @@ namespace StepmaniaServer
             }
         }
 
-        // a method that has to be here?
+        /// <summary>
+        /// a method that has to be here?
+        /// </summary>
         public void Dispose() {}
     }
 }

@@ -5,7 +5,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // sent when the user joins a room or the user changes their options
+    /// <summary>
+    /// sent when the user joins a room or the user changes their options
+    /// </summary>
     class SMClientPlayerOptions : Packet
     {
         private int _length;

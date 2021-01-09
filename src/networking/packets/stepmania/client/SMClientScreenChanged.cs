@@ -5,7 +5,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // sent when user enters / exits a network screen
+    /// <summary>
+    /// sent when user enters / exits a network screen
+    /// </summary>
     class SMClientScreenChanged : Packet
     {
         private int _length;

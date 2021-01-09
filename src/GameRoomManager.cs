@@ -17,8 +17,9 @@ namespace StepmaniaServer
         private List<GameRoom> gameRooms = new List<GameRoom>();
         private Thread roomManagerThread;
         
-        // the game room manager handles all of the rooms and handles switching
-        // users between the rooms
+        /// <summary>
+        /// the game room manager handles all of the rooms and handles switching users between the rooms
+        /// </summary>
         public GameRoomManager()
         {
             // create the 'Dummy Room' that all clients initially get added to
@@ -42,7 +43,9 @@ namespace StepmaniaServer
             roomManagerThread.Start();
         }
 
-        // updates all of the rooms
+        /// <summary>
+        /// updates all of the rooms
+        /// </summary>
         public void RoomManagerThread()
         {
             while (true)
@@ -59,8 +62,10 @@ namespace StepmaniaServer
             }
         }
 
-        // add a client to the 'network' of rooms by adding it to the dummy
-        // room
+        /// <summary>
+        /// add a client to the 'network' of rooms by adding it to the dummy room
+        /// </summary>
+        /// <param name="tcpClient">the tcp client</param>
         public void AddClient(TcpClient tcpClient)
         {
             // create a game client from the TCP client
@@ -70,7 +75,12 @@ namespace StepmaniaServer
             gameRooms[0].AddGameClient(gameClient);
         }
 
-        // move clients between rooms
+        /// <summary>
+        /// move clients between rooms
+        /// </summary>
+        /// <param name="gameClient">the game client</param>
+        /// <param name="roomFrom">the room the client is leaving</param>
+        /// <param name="roomTo">the room the client is entering</param>
         public void MoveClient(GameClient gameClient, GameRoom roomFrom, GameRoom roomTo)
         {
             logger.Trace("Client moving from {from} to {to}", roomFrom.Room.Name, roomTo.Room.Name);
@@ -83,13 +93,22 @@ namespace StepmaniaServer
             gameClient.CurrentRoom.RoomManager = this;
         }
 
+        /// <summary>
+        /// Utility method to move the client to the dummy room
+        /// </summary>
+        /// <param name="gameClient"></param>
         public void MoveToDummyRoom(GameClient gameClient)
         {
             GameRoom dummyRoom = gameRooms[0];
             MoveClient(gameClient, gameClient.CurrentRoom, dummyRoom);
         }
 
-        // create new room
+        /// <summary>
+        /// create new room
+        /// </summary>
+        /// <param name="name">room name</param>
+        /// <param name="description">room description</param>
+        /// <param name="password">room password (can be blank)</param>
         public void CreateRoom(string name, string description, string password)
         {
             // TODO: Check that room doesnt actually exist in db already
@@ -109,7 +128,13 @@ namespace StepmaniaServer
             gameRooms.Add(newGameRoom);
         }
 
-        // enter a room
+        /// <summary>
+        /// enter a room
+        /// </summary>
+        /// <param name="roomEnter">room name of the room to enter</param>
+        /// <param name="password">room password (can be blank)</param>
+        /// <param name="client">the game client</param>
+        /// <returns></returns>
         public bool EnterRoom(Room roomEnter, string password, GameClient client)
         {
             GameRoom gameRoomEnter = gameRooms.Where(s => s.Room.Name == roomEnter.Name).SingleOrDefault();
@@ -127,7 +152,11 @@ namespace StepmaniaServer
             }
         }
 
-        // get room information
+        /// <summary>
+        /// get room information
+        /// </summary>
+        /// <param name="name">the room name</param>
+        /// <returns>Room entity from database</returns>
         public Room GetRoom(string name)
         {
             return StepmaniaServer.dbContext.Rooms.Where(s => s.Name == name).SingleOrDefault();

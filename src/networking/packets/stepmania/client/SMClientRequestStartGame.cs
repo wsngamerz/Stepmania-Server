@@ -5,7 +5,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // The packet sent when a player selects a song or in response to whether a client has the song
+    /// <summary>
+    /// The packet sent when a player selects a song or in response to whether a client has the song
+    /// </summary>
     class SMClientRequestStartGame : Packet
     {
         private int _length;

@@ -6,7 +6,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // Updates game info for each step
+    /// <summary>
+    /// Updates game info for each step
+    /// </summary>
     class SMClientGameStatusUpdate : Packet
     {
         private int _length;

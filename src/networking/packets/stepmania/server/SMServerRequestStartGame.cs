@@ -5,7 +5,9 @@ using System.IO;
 
 namespace StepmaniaServer
 {
-    // packet sent to the client by the server in response to a requesting of a game start
+    /// <summary>
+    /// packet sent to the client by the server in response to a requesting of a game start
+    /// </summary>
     class SMServerRequestStartGame : Packet
     {
         private int _length;

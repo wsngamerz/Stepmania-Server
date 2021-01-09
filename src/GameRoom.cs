@@ -19,26 +19,42 @@ namespace StepmaniaServer
         private int ClientsInGame = 0;
         private int ClientsReady = 0;
 
-        // the game room is an instance of a room which can host a game or will
-        // just keep a group of clients updated if its the dummy room
+        /// <summary>
+        /// the game room is an instance of a room which can host a game or will just keep a group of clients updated
+        /// if it's the dummy room
+        /// </summary>
+        /// <param name="room">the room database entity</param>
         public GameRoom(Room room)
         {
             Room = room;
         }
 
-        // add a client to this specific room
+        /// <summary>
+        /// add a client to this specific room
+        /// </summary>
+        /// <param name="gameClient">the client</param>
         public void AddGameClient(GameClient gameClient)
         {
             gameClient.CurrentRoom = this;
             gameClients.Add(gameClient);
         }
 
-        // remove client from game room
+        /// <summary>
+        /// remove client from game room
+        /// </summary>
+        /// <param name="gameClient">the client</param>
         public void RemoveGameClient(GameClient gameClient)
         {
             gameClients.Remove(gameClient);
         }
 
+        /// <summary>
+        /// Start the game
+        /// </summary>
+        /// <param name="status">server start game status</param>
+        /// <param name="title">the song title</param>
+        /// <param name="artist">the song artist</param>
+        /// <param name="subtitle">the song subtitle</param>
         public void StartGame(ServerRequestStartGame status, string title, string artist, string subtitle)
         {
             // TODO: Perform verifications about whether song exists on clients
@@ -51,6 +67,9 @@ namespace StepmaniaServer
             }
         }
 
+        /// <summary>
+        /// Called when a client has said that it's ready
+        /// </summary>
         public void ClientReady()
         {
             ClientsReady++;
@@ -67,7 +86,9 @@ namespace StepmaniaServer
             }
         }
 
-        // update all of this rooms clients
+        /// <summary>
+        /// update all of this rooms clients
+        /// </summary>
         public void Update()
         {
             foreach (GameClient gameClient in gameClients.ToList())
